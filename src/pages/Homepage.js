@@ -2,17 +2,18 @@ import Header from "../components/Header";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import closet from "../assets/images/closet.png";
-
-import { getClothes } from "../utils/DBManipulations";
+import { getClothes, } from "../utils/DBManipulations";
 import "firebase/database";
 
 import { useState, useEffect } from "react";
 
 //import { weatherApiKey } from "../weatherApiKey";
-import { fetchWeatherApi } from "openmeteo";
+import { fetchForecastData } from "../utils/WeatherApi";
 import { auth, updateUser } from "../utils/AuthManipulations";
 import OutfitGeneration from "../components/OutfitGeneration";
 import NoClothes from "../components/NoClothes";
+import WarningAlert from "../components/WarningAlert";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function HomepageMain() {
 	const [clothes, setClothes] = useState([]);
@@ -23,10 +24,10 @@ function HomepageMain() {
 	}, []);
 	
 	useEffect(() => {
-		console.log(auth);
+	//console.log(auth);
 		if (user) {
 			getClothes().then((data) => {
-				console.log("clothes fetched", data);
+		//console.log("clothes fetched", data);
 
 				setClothes(data);
 			
@@ -34,102 +35,10 @@ function HomepageMain() {
 		}
 	}, [user]);
 	useEffect(() => {
-		fetchForecastData();
+		fetchForecastData(setWeatherData);
 		
 	}, []);
 
-	//function that fetches data
-	async function fetchForecastData() {
-		
-		const currentTime = new Date();
-		const params = {
-			latitude: 50.4547,
-			longitude: 30.5238,
-			hourly: [
-				"apparent_temperature",
-				"precipitation_probability",
-				"precipitation",
-				"snowfall",
-				"weather_code",
-				"wind_speed_10m",
-			],
-			forecast_days: 1,
-		};
-		await navigator.geolocation.getCurrentPosition((position) => {
-			const { latitude, longitude } = position.coords;
-			params.latitude = latitude;
-			params.longitude = longitude;
-		});
-		const url = "https://api.open-meteo.com/v1/forecast";
-		const responses = await fetchWeatherApi(url, params);
-
-		// Process first location. Add a for-loop for multiple locations or weather models
-		const response = responses[0];
-		console.log("weather response: ",response);
-
-		const hourly = response.hourly();
-		
-		const weatherData = {
-			hourly: {
-				apparentTemperature: hourly.variables(0).valuesArray(),
-				precipitationProbability: hourly.variables(1).valuesArray(),
-				precipitation: hourly.variables(2).valuesArray(),
-				snowfall: hourly.variables(3).valuesArray(),
-				weatherCode: hourly.variables(4).valuesArray(),
-				windSpeed10m: hourly.variables(5).valuesArray(),
-			},
-		};
-		console.log("hourly weatherData: ",weatherData);
-		
-		const thisHour = currentTime.getHours();
-		console.log(thisHour)
-		const weatherConditions = {
-			0: "Clear sky",
-			1: "Mainly clear",
-			2: "Partly cloudy",
-			3: "Overcast",
-			45: "Fog",
-			48: "Depositing rime fog",
-			51: "Drizzle: light intensity",
-			53: "Drizzle: moderate intensity",
-			55: "Drizzle: dense intensity",
-			56: "Freezing Drizzle: light intensity",
-			57: "Freezing Drizzle: dense intensity",
-			61: "Rain: slight intensity",
-			63: "Rain: moderate intensity",
-			65: "Rain: heavy intensity",
-			66: "Freezing Rain: light intensity",
-			67: "Freezing Rain: heavy intensity",
-			71: "Snow fall: slight intensity",
-			73: "Snow fall: moderate intensity",
-			75: "Snow fall: heavy intensity",
-			77: "Snow grains",
-			80: "Rain showers: slight",
-			81: "Rain showers: moderate",
-			82: "Rain showers: violent",
-			85: "Snow showers slight",
-			86: "Snow showers heavy",
-			95: "Thunderstorm: slight or moderate",
-			96: "Thunderstorm with slight hail",
-			99: "Thunderstorm with heavy hail",
-		};
-		
-		const thisHourForecast = {
-			apparentTemperature: weatherData.hourly.apparentTemperature[thisHour],
-			precipitationProbability:
-				weatherData.hourly.precipitationProbability[thisHour],
-			precipitation: weatherData.hourly.precipitation[thisHour],
-			snowfall: weatherData.hourly.snowfall[thisHour],
-			condition: {
-				code: weatherData.hourly.weatherCode[thisHour],
-				text: weatherConditions[weatherData.hourly.weatherCode[thisHour]],
-			},
-
-			windSpeed10m: weatherData.hourly.windSpeed10m[thisHour],
-		};
-		setWeatherData(thisHourForecast);
-		console.log(thisHourForecast);
-	}
 
 	return (
 		<main className="page-main">
@@ -142,10 +51,43 @@ function HomepageMain() {
 					{weatherData &&
 						weatherData.condition.text &&
 						weatherData.apparentTemperature && (
+							<>
 							<h2 className="page-sub-title">
 								{weatherData.condition.text}. Feels like{" "}
 								{weatherData.apparentTemperature.toFixed(1)} C°
 							</h2>
+							<div className="warning-messages-container">
+								{
+									((weatherData.condition.code >=51 && weatherData.condition.code <= 67) || (weatherData.condition.code >= 80 && weatherData.condition.code <= 82)  || (weatherData.condition.code >= 95 && weatherData.condition.code <= 99)) &&
+									<WarningAlert>
+										<span className="icons">
+											<FontAwesomeIcon icon="fa-solid fa-cloud-showers-heavy" /> <FontAwesomeIcon icon="fa-solid fa-umbrella" />
+										</span> 
+										You should take an umbrella! Rain probability is {weatherData.precipitationProbability}%</WarningAlert>
+								}{	((weatherData.condition.code >= 71 && weatherData.condition.code <= 77) || (weatherData.condition.code >= 85 && weatherData.condition.code <= 86)) &&
+									<WarningAlert>
+										<span className="icons">
+											<FontAwesomeIcon icon="fa-regular fa-snowflake" /> <FontAwesomeIcon icon="fa-solid fa-mitten" />
+										</span> 
+										Don't forget your hat and mittens, it's snowing!</WarningAlert>
+								}{	(Math.round(weatherData.uvIndexMax) >= 4 && Math.round(weatherData.uvIndexMax) <= 6) &&
+									<WarningAlert>
+										<span className="icons">
+											<FontAwesomeIcon icon="fa-solid fa-sun" /> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-sunglasses" viewBox="0 0 16 16">
+											<path d="M3 5a2 2 0 0 0-2 2v.5H.5a.5.5 0 0 0 0 1H1V9a2 2 0 0 0 2 2h1a3 3 0 0 0 3-3 1 1 0 1 1 2 0 3 3 0 0 0 3 3h1a2 2 0 0 0 2-2v-.5h.5a.5.5 0 0 0 0-1H15V7a2 2 0 0 0-2-2h-2a2 2 0 0 0-1.888 1.338A2 2 0 0 0 8 6a2 2 0 0 0-1.112.338A2 2 0 0 0 5 5zm0 1h.941c.264 0 .348.356.112.474l-.457.228a2 2 0 0 0-.894.894l-.228.457C2.356 8.289 2 8.205 2 7.94V7a1 1 0 0 1 1-1"/>
+										</svg>
+									  </span>
+									 You'd better put something on your head and grab a pair of shades, it can be pretty sunny today!</WarningAlert>
+								}{	(Math.round(weatherData.uvIndexMax) > 6) &&
+									<WarningAlert>
+										<span className="icons">
+										<FontAwesomeIcon icon="fa-solid fa-triangle-exclamation" /> <FontAwesomeIcon icon="fa-solid fa-sun" /> 
+											
+								  </span>
+								   Don't go outside without covering your had and wearing suncream, the sun can be boiling today! It's better to stay indoors or seek shadow until the sun sets</WarningAlert>
+								}
+							</div>
+							</>
 						)}
 
 					

@@ -115,7 +115,7 @@ export default function Header() {
 			<div ref={bg} className="background"></div>
 			<div className="header-content">
 				<h2>WELCOME TO</h2>
-				<h1>OUTFIT GENERATOR</h1>
+				<h1>CLOSET ASSISTANT</h1>
 			</div>
 			<div className="control">
 				<div

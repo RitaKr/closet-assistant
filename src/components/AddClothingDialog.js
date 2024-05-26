@@ -14,7 +14,7 @@ import InfoAlert from "./InfoAlert";
 import { imaggaApiSecret, imaggaApiKey } from "../config";
 import ColorsSelect from "./ColorsSelect";
 import Required from "./Required";
-
+import axios from "axios";
 
 
 export default function AddClothingDialog({
@@ -126,34 +126,22 @@ export default function AddClothingDialog({
 			});
 		//console.log("clothing.imageUrl before color iden:", tempUrl, tempName);
 			setFormSubmitted(false);
-			//uploadImage(file);
-			//await uploadImageToStorage(file);
-		//console.log('Checking clothing:', clothing);
+
 			if (!clothing.id){
 				const reader = new FileReader();
 
 				reader.onloadend = () => {
-					// The file's text will be printed here
-					//console.log("reader.result:", reader.result);
 					uploadImageToImaggaApi(reader.result, tempUrl, tempName);
 				};
 
 				reader.readAsDataURL(file);
 			}
 
-			
-			// setClothing({
-			// 	...clothing,
-			// 	imageUrl: tempUrl,
-			// 	imageName: tempName,
-			// });
-
 		}
 	};
 
 	const uploadImageToImaggaApi = async (fileBase64, tempUrl, tempName) => {
-		
-		const fetch = require('node-fetch');
+
 		setBgRemoveStatus("identifying color");
 		
 		(async () => {
@@ -164,29 +152,38 @@ export default function AddClothingDialog({
 					}, 15000); // 10 seconds
 				});
 
-				const response = await Promise.race([
-					fetch('https://api.imagga.com/v2/colors', {
-						method: 'POST',
-						headers: {
-							'Authorization': 'Basic ' + btoa(imaggaApiKey + ':' + imaggaApiSecret),
-							'Content-Type': 'application/x-www-form-urlencoded'
-						},
-						body: `image_base64=${encodeURIComponent(fileBase64)}`
+				 await Promise.race([
+					axios.post('https://api.imagga.com/v2/colors', `image_base64=${encodeURIComponent(fileBase64)}`, {
+					  headers: {
+						'Authorization': 'Basic ' + btoa(imaggaApiKey + ':' + imaggaApiSecret),
+						'Content-Type': 'application/x-www-form-urlencoded'
+					  },
 					}),
 					timeoutPromise
-				]);
+				  ]).then(response=>{
+					//console.log(response)
+					if (response.status < 200 || response.status >= 300){
+						setBgRemoveStatus("color timeout");
+						throw new Error(`HTTP error! status: ${response.status}`);
+					}
+	
+					const colorRes = response.data.result.colors.foreground_colors[0].closest_palette_color_parent;
+				//console.log(colorRes);
+	
+					setClothing({...clothing, color: colorRes, imageUrl: tempUrl, imageName: tempName});
+					setBgRemoveStatus("color done");
+				  }).catch(err=>{
+					console.error("imagga api error:", err)
+					if (err.message === "Request timed out") {
+						setBgRemoveStatus("color timeout");
+					} else {
+					//console.log(error);
+					}
+				  })
 
-				if (!response.ok) {
-					setBgRemoveStatus("color timeout");
-					throw new Error(`HTTP error! status: ${response.status}`);
-				}
+				  
 
-				const data = await response.json();
-				const colorRes = data.result.colors.foreground_colors[0].closest_palette_color_parent;
-			//console.log(colorRes);
-
-				setClothing({...clothing, color: colorRes, imageUrl: tempUrl, imageName: tempName});
-				setBgRemoveStatus("color done");
+				
 			} catch (error) {
 				if (error.message === "Request timed out") {
 					setBgRemoveStatus("color timeout");
@@ -195,6 +192,7 @@ export default function AddClothingDialog({
 				}
 			}
 		})();
+	
 	}
 	
 

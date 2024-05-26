@@ -1,7 +1,7 @@
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import { useRef, useEffect, useState, useCallback } from "react";
-import { emptyForm } from "../assets/DBManipulations";
+import { emptyForm } from "../utils/DBManipulations";
 
 import AddClothingDialog from "../components/AddClothingDialog";
 import ClothingFigure from "../components/ClothingFigure";
