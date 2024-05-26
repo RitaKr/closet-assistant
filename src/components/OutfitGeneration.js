@@ -1,208 +1,261 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
-import { writeOutfit } from "../utils/DBManipulations";
+import { writeOutfit, getCollections } from "../utils/DBManipulations";
 import SuccessAlert from "../components/SuccessAlert";
 import ErrorAlert from "../components/ErrorAlert";
 import OutfitFigure from "../components/OutfitFigure";
 import NoClothes from "./NoClothes";
-
-
+import ColorsSelect from "./ColorsSelect";
+import WarningAlert from "./WarningAlert";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Select from "./Select";
+import { generateOutfit, filterClothesForWeather } from "../utils/WeatherApi";
+import DetailsForm from "./DetailsForm";
+import { fas } from "@fortawesome/free-solid-svg-icons";
+import { library } from "@fortawesome/fontawesome-svg-core";
+library.add(fas);
 
 export default function OutfitGeneration({ clothes, weatherData }) {
 	const [outfitOptions, setOutfitOptions] = useState(null);
 	const [outfit, setOutfit] = useState(null);
 	const [error, setError] = useState(null);
+	const [color, setColor] = useState(null);
+	const [style, setStyle] = useState(null);
+	const [includeWhite, setIncludeWhite] = useState(true);
+	const [includeBlack, setIncludeBlack] = useState(true);
+	const [collections, setCollections] = useState([]);
+	const [messages, setMessages] = useState({
+		"No t-shirt/shirt or dress found for the current weather. Consider uploading some": false,
+		"No pants/shirts/skirt found for the current weather. Consider uploading some": false,
+		"No shoes found for the current weather. Consider uploading some": false,
+		"No coat/jacket found for the current weather. Consider uploading some": false,
+		"No hoodie/sweatshirt or sweater found for the current weather. Consider uploading some": false,
+		"No underwear found for the current weather. Consider uploading some": false,
+	});
+	useEffect(() => {
+		getCollections().then((data) => {
+			setCollections(data);
+		});
+	}, []);
 
 	useEffect(() => {
-		filterClothesForWeather();
-	}, [clothes]);
+		setOutfitOptions(
+			filterClothesForWeather(
+				clothes,
+				weatherData.apparentTemperature,
+				color,
+				style,
+				includeWhite,
+				includeBlack
+			)
+		);
+		//updateMessages(outfitOptions);
+	}, [clothes, color, includeBlack, includeWhite, style]);
 
 	useEffect(() => {
-		console.log("outfitOptions", outfitOptions);
-		if (outfitOptions) generateOutfit();
+		//console.log("outfitOptions", outfitOptions);
+		if (outfitOptions) handleGeneration();
 	}, [outfitOptions]);
 
-	function parseTempRange(rangeStr) {
-		//console.log(rangeStr)
-		let range = rangeStr.split(" to ").map((t) => parseInt(t.trim()));
-		if (range.length < 2) {
-			if (rangeStr.indexOf("less than") >= 0) {
-				range = [-100, parseInt(rangeStr.split(" ")[2].trim())];
-			} else if (rangeStr.indexOf("more then") >= 0) {
-				range = [parseInt(rangeStr.split(" ")[2].trim()), 100];
-			}
+	useEffect(() => {
+		//console.log("outfitOptions", outfitOptions);
+		updateMessages();
+	}, [outfit, includeBlack, includeWhite, style]);
+
+	function handleGeneration() {
+		generateOutfit(outfitOptions)
+			.then((data) => {
+				setOutfit(data);
+			})
+			.catch((e) => {
+				console.error(e);
+				setError(true);
+				setTimeout(() => setError(null), 5000);
+			});
+	}
+
+	function updateMessages() {
+		if (outfit) {
+			//console.log("outfit:",outfit);
+			const missingShoes = !outfit.some((item) => item.type === "Shoes");
+			const missingCoat =
+				(!outfit.some(
+					(item) =>
+						item.type === "Coat/jacket" ||
+						item.type === "Hoodie/sweatshirt or sweater"
+				) &&
+					weatherData.apparentTemperature <= 18) ||
+				(!outfit.some((item) => item.type === "Coat/jacket") &&
+					weatherData.apparentTemperature <= 8);
+			const missingHoodie =
+				!outfit.some((item) => item.type === "Hoodie/sweatshirt or sweater") &&
+				weatherData.apparentTemperature <= 18;
+			const missingTshirt = !outfit.some(
+				(item) => item.type === "T-shirt/shirt"
+			);
+			const missingPants = !outfit.some(
+				(item) =>
+					item.type === "Pants/shirts/skirt" || item.type === "Pants/skirt"
+			);
+			const missingUnderwear =
+				!outfit.some((item) => item.type === "Underwear") &&
+				weatherData.apparentTemperature <= 5;
+			//console.log("missingTshirt:",missingTshirt, ", missingPants:",missingPants, ", missingUnderwear:", missingUnderwear, ", missingShoes:",missingShoes, ", missingCoat:",missingCoat, ", missingHoodie:",missingHoodie);
+
+			setMessages({
+				"No t-shirt/shirt or dress found for the current weather. Consider uploading some":
+					missingTshirt,
+				"No pants/shirts/skirt found for the current weather. Consider uploading some":
+					missingPants,
+				"No shoes found for the current weather. Consider uploading some":
+					missingShoes,
+				"No coat/jacket found for the current weather. Consider uploading some":
+					missingCoat,
+				"No hoodie/sweatshirt or sweater found for the current weather. Consider uploading some":
+					missingHoodie,
+				"No underwear found for the current weather. Consider uploading some":
+					missingUnderwear,
+			});
+
+			//console.log("messages", messages);
 		}
-		//console.log(range);
-		return range;
-	}
-	function fitsIntoRange(rangesArr, temp) {
-		console.log(rangesArr, temp);
-
-		return (
-			rangesArr.filter((range) => temp >= range[0] && temp <= range[1]).length >
-			0
-		);
 	}
 
-	function filterClothesForWeather() {
-		console.log("clothes:",clothes)
-		const filteredClothes = {
-			headwear: [],
-			accessory: [],
-			upper3: [],
-			upper2: [],
-			upper1: [],
-			lower1: [],
-			underwear1: [],
-			underwear2: [],
-			shoes: [],
-		};
-		filteredClothes.headwear = clothes.filter((cl) => {
-			const tempRanges = cl.temperatures.map(parseTempRange);
-			console.log(fitsIntoRange(tempRanges, weatherData.apparentTemperature));
-			return (
-				cl.type === "Headwear" &&
-				!cl.inLaundry &&
-				fitsIntoRange(tempRanges, weatherData.apparentTemperature)
-			);
-		});
-		filteredClothes.accessory = clothes.filter((cl) => {
-			const tempRanges = cl.temperatures.map(parseTempRange);
-			return (
-				(cl.type === "Scarf" || cl.type === "Other") &&
-				!cl.inLaundry &&
-				fitsIntoRange(tempRanges, weatherData.apparentTemperature)
-			);
-		});
-		filteredClothes.upper3 = clothes.filter((cl) => {
-			const tempRanges = cl.temperatures.map(parseTempRange);
-			return (
-				cl.type === "Coat/jacket" &&
-				!cl.inLaundry &&
-				fitsIntoRange(tempRanges, weatherData.apparentTemperature)
-			);
-		});
-		filteredClothes.upper2 = clothes.filter((cl) => {
-			const tempRanges = cl.temperatures.map(parseTempRange);
-			return (
-				cl.type === "Hoodie/sweatshirt or sweater" &&
-				!cl.inLaundry &&
-				fitsIntoRange(tempRanges, weatherData.apparentTemperature)
-			);
-		});
-		filteredClothes.upper1 = clothes.filter((cl) => {
-			const tempRanges = cl.temperatures.map(parseTempRange);
-			return (
-				(cl.type === "T-shirt/shirt" || cl.type === "Dress") &&
-				!cl.inLaundry &&
-				fitsIntoRange(tempRanges, weatherData.apparentTemperature)
-			);
-		});
-		filteredClothes.lower1 = clothes.filter((cl) => {
-			const tempRanges = cl.temperatures.map(parseTempRange);
-			return (
-				cl.type === "Pants/skirt" &&
-				!cl.inLaundry &&
-				fitsIntoRange(tempRanges, weatherData.apparentTemperature)
-			);
-		});
-		filteredClothes.underwear1 = clothes.filter((cl) => {
-			const tempRanges = cl.temperatures.map(parseTempRange);
-			return (
-				(cl.type === "Underpants" || cl.type === "Socks") &&
-				!cl.inLaundry &&
-				fitsIntoRange(tempRanges, weatherData.apparentTemperature)
-			);
-		});
-		filteredClothes.underwear2 = clothes.filter((cl) => {
-			const tempRanges = cl.temperatures.map(parseTempRange);
-			return (
-				cl.type === "Underpants" &&
-				!cl.inLaundry &&
-				fitsIntoRange(tempRanges, weatherData.apparentTemperature)
-			);
-		});
-		filteredClothes.shoes = clothes.filter((cl) => {
-			const tempRanges = cl.temperatures.map(parseTempRange);
-			return (
-				cl.type === "Shoes" &&
-				!cl.inLaundry &&
-				fitsIntoRange(tempRanges, weatherData.apparentTemperature)
-			);
-		});
-		console.log("matches for the weather: ", filteredClothes);
-		setOutfitOptions(filteredClothes);
-		//console.log("setOutfitOptions: ", outfitOptions)
-	}
-
-	function randomItem(arr) {
-		const i = Math.floor(Math.random() * arr.length);
-		return arr[i];
-	}
-	async function generateOutfit() {
-		console.log(outfitOptions);
-		const outfit = await Object.values(outfitOptions).reduce(
-			(acc, optionsArr) => {
-				console.log(acc, optionsArr);
-				let random = randomItem(optionsArr);
-				console.log("random:", random);
-				if (typeof random !== "undefined") {
-					while (acc.includes(random) && outfitOptions.length > 1)
-						random = randomItem(optionsArr);
-					if (!acc.includes(random)) acc.push(random);
-				}
-				return acc;
-			},
-			[]
-		);
-		console.log(outfit);
-		setOutfit(outfit);
-	}
 	function addToCollection(e) {
-		console.log(e.target.dataset.collection, outfit);
-		try{
-			writeOutfit(e.target.dataset.collection, outfit);
+		//console.log(e.target.dataset.collection, outfit);
+		try {
+			writeOutfit(e.currentTarget.dataset.collection, outfit, weatherData.apparentTemperature.toFixed(1), style, color);
 			setError(false);
-			setTimeout(()=>setError(null), 5000);
+			setTimeout(() => setError(null), 3000);
 		} catch (error) {
 			setError(true);
-			setTimeout(()=>setError(null), 5000);
+			setTimeout(() => setError(null), 3000);
 		}
-		
-		
 	}
+
 	return (
 		<>
-			{outfit &&
-				(outfit.length > 0 ? (
-					<div className="result-container">
-						<h1 className="page-title">Here's your outfit for today</h1>
-						<OutfitFigure clothes={outfit} />
-						<div className="action-panel">
-							<button className="button" onClick={generateOutfit}>
-								Regenerate
-							</button>
-							<button className="button add-to-collection-btn" disabled={!outfit}>
-								<span>Add to collection</span>
-							<ul className="sub-menu">
-								<li className="add-to-collection-sub-btn" data-collection="Winter" onClick={addToCollection}>Winter</li>
-								<li className="add-to-collection-sub-btn" data-collection="Spring" onClick={addToCollection}>Spring</li>
-								<li className="add-to-collection-sub-btn" data-collection="Summer" onClick={addToCollection}>Summer</li>
-								<li className="add-to-collection-sub-btn" data-collection="Autumn" onClick={addToCollection}>Autumn</li>
-							</ul>
-							</button>
-						</div>
-						{error===false ? <SuccessAlert>Outfit added to collection</SuccessAlert>
-						: error===true ?
-						<ErrorAlert>Error occurred while adding outfit to collection</ErrorAlert>
-						:""
-						}
-					</div>
-				) : (
-					<NoClothes>
-						No clothes matching current weather found. Consider uploading some
-					</NoClothes>
-				))}
+			{outfit && collections && (
+				<div className="result-container">
+					<h1 className="page-title">Here's your outfit for today</h1>
+
+					<DetailsForm title="Generation settings">
+						<section className="generation-settings">
+							<div className="setting-group">
+								<h4>Color preferences</h4>
+								<div>
+									<label>Outfit color theme:</label>
+									<ColorsSelect
+										colorsArr={[...new Set(clothes.map((cl) => cl.color))]}
+										selectedColor={color}
+										handleChange={(e) => setColor(e.target.value)}
+									/>
+								</div>
+
+								<div>
+									<label>Include black?</label>
+									<input
+										type="checkbox"
+										checked={includeBlack}
+										onChange={() => setIncludeBlack(!includeBlack)}
+									/>
+								</div>
+								<div>
+									<label htmlFor="color">Include white?</label>
+									<input
+										type="checkbox"
+										checked={includeWhite}
+										onChange={() => setIncludeWhite(!includeWhite)}
+									/>
+								</div>
+							</div>
+							<div className="setting-group">
+								<h4>Style preferences</h4>
+								<div>
+									<label htmlFor="style">Outfit style:</label>
+									<Select
+										id="style"
+										options={[...new Set(clothes.flatMap((cl) => cl.styles))]}
+										selected={style}
+										handleChange={(e) => setStyle(e.target.value)}
+									/>
+								</div>
+							</div>
+						</section>
+					</DetailsForm>
+
+					{outfit.length > 0 ? (
+						<>
+							<OutfitFigure clothes={outfit} />
+							<div className="action-panel">
+								<button
+									className="button"
+									onClick={handleGeneration}
+									title="Regenerate"
+								>
+									<FontAwesomeIcon icon={["fas", "rotate-right"]} />
+								</button>
+								<button
+									className="button add-to-collection-btn"
+									disabled={!outfit}
+								>
+									<span>Add to collection</span>
+									<ul className="sub-menu">
+										{collections.map((collection) => {
+											return (
+												<li
+													className="add-to-collection-sub-btn"
+													data-collection={collection.id}
+													onClick={addToCollection}
+													key={collection.id}
+												>
+													{collection.name === "Favorites" ? (
+														<span className="info">
+															{" "}
+															<FontAwesomeIcon icon="fa-solid fa-star" />
+															{" "}
+															{collection.name}
+														</span>
+													) : (
+														collection.name
+													)}
+												</li>
+											);
+										})}
+									</ul>
+								</button>
+							</div>
+							<div className="warning-messages-container">
+								{Object.entries(messages)
+									.filter(([m, incl]) => incl)
+									.map(([m, incl], i) => {
+										return (
+											<WarningAlert key={i}>
+												<span className="icons">
+													<FontAwesomeIcon icon="fa-solid fa-circle-exclamation" />
+												</span>
+												{m}
+											</WarningAlert>
+										);
+									})}
+							</div>
+							{error === false ? (
+								<SuccessAlert>Outfit added to collection</SuccessAlert>
+							) : error === true ? (
+								<ErrorAlert>
+									Error occurred while adding outfit to collection
+								</ErrorAlert>
+							) : (
+								""
+							)}
+						</>
+					) : (
+						<NoClothes>
+							No clothes matching current weather found. Consider uploading some
+						</NoClothes>
+					)}
+				</div>
+			)}
 		</>
 	);
 }

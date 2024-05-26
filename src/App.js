@@ -1,25 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+
+import Homepage from './pages/Homepage';
+import Closet from './pages/Closet';
+import Login from './pages/Login';
+
+import { getCollections, database } from './utils/DBManipulations';
+import Loader from "./components/Loader";
+import { updateUser } from "./utils/AuthManipulations";
+import { onChildChanged, onChildRemoved, onChildAdded, ref } from "firebase/database";
+import Profile from "./pages/Profile";
+
+export default function App(){
+    const [user, setUser] = useState(null)
+
+
+
+    useEffect(() => {
+		updateUser(setUser);
+	}, []);
+
+
+
+
+    return (
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login isSignUp={false} />} />
+          <Route path="/signup" element={<Login isSignUp={true} />} />
+          <Route path="/" element={<Homepage />} />
+          <Route path="/closet" element={<Closet />} />
+          
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+        
+      </Router>
+    )
 }
-
-export default App;
