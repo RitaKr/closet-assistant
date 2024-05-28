@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Homepage from './pages/Homepage';
 import Closet from './pages/Closet';
 import Login from './pages/Login';
+import MainPage from './pages/MainPage';
 
 import { getCollections, database } from './utils/DBManipulations';
 import Loader from "./components/Loader";
@@ -31,7 +32,7 @@ export default function App(){
           <Route path="/signup" element={<Login isSignUp={true} />} />
           <Route path="/" element={<Homepage />} />
           <Route path="/closet" element={<Closet />} />
-          
+            <Route path="/mainPage" element={<MainPage />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
         
