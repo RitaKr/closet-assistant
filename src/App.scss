@@ -1329,6 +1329,69 @@ div[role="dialog"] {
 }
 
 
+//---------------------CALENDAR--------------------
+.calendar-grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	width: 100%;
+	height: 100%;
+	gap: 10px;
+
+	.calendar-day {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		border-radius: 10px;
+		background: $main-col-lighter;
+
+		header {
+			font-size: 1.1rem;
+			font-weight: 500;
+			text-align: center;
+			background: $main-col;
+			width: 100%;
+			padding: 5px 10px;
+			border-radius: 10px 10px 0 0;
+		}
+	}
+
+	.outfits {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		flex-grow: 1;
+		gap: 10px;
+
+		.outfit-type {
+			flex-basis: 50%;
+
+			padding: 10px;
+
+			&:not(:last-child) {
+				border-bottom: 2px solid $main-col;
+			}
+		}
+		h4 {
+			font-size: 1.1rem;
+			font-weight: 600;
+			color: $nav-bg-col;
+			text-align: center;
+			margin-bottom: 8px;
+		}
+		.outfit {
+			background: $main-col-lighter;
+			border: 2px dashed $main-col;
+			border-radius: 10px;
+			border-radius: 5px;
+			padding: 5px;
+			margin: 5px;
+			border: none;
+			img {
+				height: 60px;
+			}
+		}
+	}
+}
 
 
 

@@ -11,6 +11,7 @@ import Loader from "./components/Loader";
 import { updateUser } from "./utils/AuthManipulations";
 import { onChildChanged, onChildRemoved, onChildAdded, ref } from "firebase/database";
 import Profile from "./pages/Profile";
+import Calendar from "./pages/Calendar";
 
 export default function App(){
     const [user, setUser] = useState(null)
@@ -31,7 +32,7 @@ export default function App(){
           <Route path="/signup" element={<Login isSignUp={true} />} />
           <Route path="/" element={<Homepage />} />
           <Route path="/closet" element={<Closet />} />
-          
+          <Route path="/calendar" element={<Calendar />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
         
