@@ -1,7 +1,7 @@
 import Header from "../components/Header";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
-import closet from "../assets/images/closet.png";
+
 import { getClothes, } from "../utils/DBManipulations";
 import "firebase/database";
 
@@ -14,7 +14,7 @@ import OutfitGeneration from "../components/OutfitGeneration";
 import NoClothes from "../components/NoClothes";
 import WarningAlert from "../components/WarningAlert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+const closet = process.env.PUBLIC_URL + '/images/wardrobe.png';
 
 function GenerationMain() {
 	const [clothes, setClothes] = useState([]);
@@ -106,7 +106,7 @@ function GenerationMain() {
 	);
 }
 
-export default function Generation() {
+export default function Generate() {
 	
 	return (
 		<>

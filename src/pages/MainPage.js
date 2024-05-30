@@ -1,20 +1,24 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import clothing from "../assets/images/clothing.jpg";
-import man from "../assets/images/man.jpg";
-import winter from "../assets/images/winter.jpg";
-import summer from "../assets/images/summer.jpg";
-import calendar from "../assets/images/calendar.jpg";
-import womanCasual from "../assets/images/woman-casual.jpg";
-import manBusiness from "../assets/images/man-business.jpg";
-import jackets from "../assets/images/jackets.jpg";
-import shelves from "../assets/images/shelves.jpg";
+
 import { useEffect, useState } from "react";
 import { updateUser } from "../utils/AuthManipulations";
 import { Link, NavLink } from "react-router-dom";
 import Nav from "../components/Nav";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+
+//importing images
+const clothing = process.env.PUBLIC_URL + "/images/clothing.jpg";
+const  man = process.env.PUBLIC_URL + "/images/man.jpg";
+const  winter = process.env.PUBLIC_URL + "/images/winter.jpg";
+const  summer = process.env.PUBLIC_URL + "/images/summer.jpg";
+const calendar = process.env.PUBLIC_URL + "/images/calendar.jpg";
+const womanCasual = process.env.PUBLIC_URL + "/images/woman-casual.jpg";
+const manBusiness = process.env.PUBLIC_URL + "/images/man-business.jpg";
+const jackets = process.env.PUBLIC_URL + "/images/jackets.jpg";
+const shelves = process.env.PUBLIC_URL + "/images/shelves.jpg";
+
 
 function Page({ user }) {
 	return (
