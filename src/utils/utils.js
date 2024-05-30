@@ -100,6 +100,26 @@ const weatherConditionsShortlist = {
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 
+function formatDate(date) {
+    const day = date.getDay();
+    return `${dayNames[day]} ${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+}
+function createSlug(name) {
+	return name
+		.toLowerCase()
+		.trim()
+		.replace(/\s/g, "-")
+		.replace(/[^a-zA-Z0-9/-]/g, "");
+}
 
+function validCollectionName(name, collections) {
+	const slug = createSlug(name);
+	const collectionNames = collections.map((col) => col.slug);
 
-export {weatherConditions, styles, colors, weatherConditionsShortlist, temperatureRanges  }
+	if (!name || collectionNames.includes(slug) || name.trim() === "") {
+		return false;
+	}
+	return true;
+}
+
+export {weatherConditions, styles, colors, weatherConditionsShortlist, temperatureRanges, formatDate, validCollectionName, createSlug}

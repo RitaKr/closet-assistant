@@ -11,6 +11,8 @@ onAuthStateChanged(auth, (user) => {
 		uid = user.uid;
 		clothesRef = ref(database, `clothes/${uid}/`);
 		ensureFavoritesCollection();
+		//outfitsRef = ref(database, `outfits/${uid}/`);
+		// ...
 	}
 });
 export const database = getDatabase(app);
@@ -31,6 +33,25 @@ export async function removeClothing(id, imageName) {
 	try {
 		remove(ref(database, `clothes/${uid}/${id}`));
 
+		//removing clothing from all outfits that contained it
+		const collections = await getCollections().then((data) =>
+			data.map((col) => col.id)
+		);
+		collections.forEach((colId) => {
+			getOutfits(colId).then((outfits) => {
+				outfits.forEach((outfit) => {
+					const otherClothes = outfit.clothes.filter((cl) => cl.id !== id);
+					if (outfit.clothes.length !== otherClothes.length) {
+						update(
+							ref(database, `collections/${uid}/${colId}/outfits/${outfit.id}`),
+							{ clothes: otherClothes }
+						);
+					}
+
+					if (otherClothes.length === 0) removeOutfit(outfit.id, colId);
+				});
+			});
+		});
 		try {
 			deleteImageFromStorage(imageName);
 		} catch (e) {
@@ -50,26 +71,6 @@ export function removeOutfit(id, collection) {
 export function removeCollection(id) {
 	remove(ref(database, `collections/${uid}/${id}`));
 	//console.log("outfit ", id, "removed: ", clothesRef);
-}
-
-export function writeCollection(collection) {
-	try {
-		const id = collection.id ? collection.id : uuidv4();
-		//console.log("outfit id:", id);
-		//console.log("outfit collection:", collection);
-		//console.log("outfit data:", data);
-		set(ref(database, `collections/${uid}/${id}/`), {
-			outfits: collection.outfits ? collection.outfits : [],
-			id: id,
-			name: collection.name,
-			slug: collection.slug,
-			addDate: collection.addDate
-				? collection.addDate
-				: new Date().toISOString(),
-		});
-	} catch (e) {
-		console.error("error adding collection " + collection + ":", e);
-	}
 }
 
 export async function writeClothing(data) {
@@ -92,8 +93,48 @@ export async function writeClothing(data) {
 		});
 
 		//removing clothing from all outfits that contained it
+		const collections = await getCollections().then((data) =>
+			data.map((col) => col.id)
+		);
+		collections.forEach((colId) => {
+			getOutfits(colId).then((outfits) => {
+				outfits.forEach((outfit) => {
+					const updatedClothes = outfit.clothes.map((cl) =>
+						cl.id === data.id ? data : cl
+					);
+					if (
+						JSON.stringify(outfit.clothes) !== JSON.stringify(updatedClothes)
+					) {
+						update(
+							ref(database, `collections/${uid}/${colId}/outfits/${outfit.id}`),
+							{ clothes: updatedClothes }
+						);
+					}
+				});
+			});
+		});
 	} catch (error) {
 		console.error("error adding clothing " + data + ":", error);
+	}
+}
+
+export function writeCollection(collection) {
+	try {
+		const id = collection.id ? collection.id : uuidv4();
+		//console.log("outfit id:", id);
+		//console.log("outfit collection:", collection);
+		//console.log("outfit data:", data);
+		set(ref(database, `collections/${uid}/${id}/`), {
+			outfits: collection.outfits ? collection.outfits : [],
+			id: id,
+			name: collection.name,
+			slug: collection.slug,
+			addDate: collection.addDate
+				? collection.addDate
+				: new Date().toISOString(),
+		});
+	} catch (e) {
+		console.error("error adding collection " + collection + ":", e);
 	}
 }
 
@@ -111,14 +152,17 @@ export function writeOutfit(collection, data, temperature, style, color) {
 		addDate: data.addDate ? data.addDate : new Date().toISOString(),
 	});
 }
-
 export async function updateClothing(data) {
 	//console.log(data);
 	await writeClothing(data);
 	//console.log("clothing ", data.id, "updated to", data, ".", clothesRef);
 }
 
-
+export function updateCollection(data) {
+	//console.log(data);
+	writeCollection(data);
+	//console.log("clothing ", data.id, "updated to", data, ".", clothesRef);
+}
 export async function getClothes() {
 	try {
 		const snapshot = await get(clothesRef);
@@ -174,7 +218,6 @@ export async function getCollections() {
 		return [];
 	}
 }
-
 export async function ensureFavoritesCollection() {
 	const collections = await getCollections();
 	const hasFavorites = collections.some(
@@ -188,6 +231,27 @@ export async function ensureFavoritesCollection() {
 			outfits: [],
 			addDate: new Date().toISOString(),
 		});
+	}
+}
+export async function getOutfits(collection) {
+	try {
+		//console.log(`outfits/${uid}/${collection}/`);
+		const snapshot = await get(
+			ref(database, `collections/${uid}/${collection}/outfits/`)
+		);
+		if (snapshot.exists()) {
+			let itemsArray = Object.values(snapshot.val()).sort(
+				(a, b) => new Date(b.addDate) - new Date(a.addDate)
+			);
+			//console.log("Outfits:", itemsArray);
+			return itemsArray;
+		} else {
+			//console.log("No items found");
+			return [];
+		}
+	} catch (error) {
+		console.error("Error fetching items:", error);
+		return [];
 	}
 }
 

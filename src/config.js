@@ -16,9 +16,11 @@ const firebaseConfig = {
   
     
   };
-  console.log(firebaseConfig)
+  //console.log(firebaseConfig)
 const app = initializeApp(firebaseConfig);
 const weatherApiKey = process.env.REACT_APP_WEATHER_API_KEY;
 const clipdropApiKey = process.env.REACT_APP_CLIPDROP_API_KEY;
+const imaggaApiKey = process.env.REACT_APP_IMAGGA_API_KEY;
+const imaggaApiSecret = process.env.REACT_APP_IMAGGA_API_SECRET;
 
-export{firebaseConfig, weatherApiKey, clipdropApiKey, app}
+export{firebaseConfig, weatherApiKey, clipdropApiKey, app, imaggaApiKey, imaggaApiSecret}
