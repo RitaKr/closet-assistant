@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-import Homepage from './pages/Homepage';
+import Generation from './pages/Homepage';
 import Closet from './pages/Closet';
 import Login from './pages/Login';
 import MainPage from './pages/MainPage';
@@ -75,10 +75,10 @@ export default function App(){
         <Routes>
           <Route path="/login" element={<Login isSignUp={false} />} />
           <Route path="/signup" element={<Login isSignUp={true} />} />
-          <Route path="/" element={<Homepage />} />
+          <Route path="/generate" element={<Generation />} />
           <Route path="/closet" element={<Closet />} />
 
-            <Route path="/mainPage" element={<MainPage />} />
+            <Route path="/" element={<MainPage />} />
 
           <Route path="/collections" element={<Collections />} />
           <Route path="/calendar" element={<Calendar />} />

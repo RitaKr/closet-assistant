@@ -15,7 +15,8 @@ import { imaggaApiSecret, imaggaApiKey } from "../config";
 import ColorsSelect from "./ColorsSelect";
 import Required from "./Required";
 import axios from "axios";
-
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
 
 export default function AddClothingDialog({
 	data,
@@ -330,7 +331,13 @@ export default function AddClothingDialog({
 								}
 							>
 								{clothing.imageUrl ? (
-									<img src={clothing.imageUrl} alt="your clothing" />
+									
+									<LazyLoadImage
+						alt="your clothing"
+						effect="blur"
+						src={clothing.imageUrl}
+                        
+					/>
 								) : (
 									<p>Here will be your image preview</p>
 								)}

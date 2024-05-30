@@ -6,7 +6,7 @@ import {
 	database,
 	getCollections,
 	writeCollection,
-} from "../utils/DBmanipulations";
+} from "../utils/DBManipulations";
 import { updateUser } from "../utils/AuthManipulations";
 import {
 	onChildAdded,

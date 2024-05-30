@@ -1,3 +1,6 @@
+@import "@fortawesome/fontawesome-free/scss/fontawesome";
+@import "@fortawesome/fontawesome-free/scss/solid";
+
 $main-col: #9e6747;
 $main-col-lighter: lighten($main-col, 30%);
 $main-col-darker: darken($main-col, 25%);
@@ -336,6 +339,10 @@ h3 {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	&-no-padding {
+		padding: 0;
+		padding-bottom: calc(5vw + 100px);
+	}
 }
 .generate-outfit-container {
 	display: flex;
@@ -1032,6 +1039,8 @@ div[role="dialog"] {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+
+	z-index: 10;
 	
 }
 .delete-btn {
@@ -1414,7 +1423,7 @@ div[role="dialog"] {
 
 
 
-///---------------------------ANIMATIONS
+
 
 .add-collection-form {
 	padding: 20px;
@@ -1474,13 +1483,6 @@ div[role="dialog"] {
 					transform: translateX(5px);
 				}
 			}
-
-
-
-
-
-///--------------------------MOBILE ADAPTATION
-
 
 			h3 {
 				font-size: 1.4rem;
@@ -1550,6 +1552,178 @@ div[role="dialog"] {
 	color: $text-col;
 }
 
+
+
+
+
+
+
+
+///----------------------------------MAIN PAGE
+
+.lazy-load-image-background {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+}
+.main-section {
+	min-height: calc(100dvh - $nav-height);
+	
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 5vw;
+	text-align: center;
+
+	&:nth-child(2n+1) {
+		background: $footer-bg-col;
+	}
+
+	&.second-page {
+		min-height: 50vw;
+		height: 50vw;
+	}
+	
+	h1 {
+		font-size: 3.5rem;
+		margin-bottom: 2rem;
+	}
+	h2 {
+		font-size: 2rem;
+		margin-bottom: 2rem;
+		color: $main-col-lighter;
+	}
+	.button {
+		font-size: 1.5rem;
+		display: inline-block;
+	}
+
+	ul {
+		text-align: right;
+		font-size: 1.5rem;
+		color: $main-col-lighter;
+
+		li:not(:last-child) {
+			margin-bottom: 10px;
+		}
+		li {
+			padding-left: 10px;
+		}
+		li::marker {
+			color: $main-col;
+			display: inline-block;
+			text-rendering: auto;
+			-webkit-font-smoothing: antialiased;
+			font-family: "Font Awesome 6 Free";
+			font-weight: 400;
+			content: '\f058';
+			
+		}
+	}
+	div {
+		max-width: 100%;
+		img {
+			width: 100%;
+		}
+	}
+}
+
+.two-col-section {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	max-width: 100%;
+	column-gap: 4vw;
+	row-gap: 2vw;
+	height: 100vh;
+	text-align: left;
+	
+
+	&.reverse {
+		flex-direction: row-reverse;
+		
+		text-align: right;
+	}
+
+	&.main-section > div {
+		flex-grow: 1;
+	}
+	.text-container {
+		max-width: 45%;
+	}
+	&.images-container {
+		height:auto;	
+		flex-wrap: wrap;
+		& > span {
+		flex-grow: 1;
+		width: 40%;
+	}
+}
+}
+.two-col-section .images-container, 
+.two-col-section-reverse .images-container {
+	max-width: 40%;
+	height: 100%;
+	display: flex;
+	justify-content: flex-end;
+	img {
+		max-height: 100%;
+		width: auto;
+	}
+
+	&.absolute-container {
+		position: relative;
+		height: 40vw;
+		//width: 100%;
+
+		span {
+			position: absolute;
+			height:auto;
+			img {
+				width: 100%;
+			}
+			
+			&:has(.man) {
+				top: 0;
+				left: 0;
+				width: 42%;
+				
+			}
+			&:has(.winter) {
+				top: 2vw;
+				right: 3vw;
+				width: 45%;
+			}
+			&:has(.summer) {
+				bottom: 0px;
+				right: 0;
+				height: 49%;
+			}
+			&:has(.woman-casual) {
+				top: 0;
+				left: 0;
+				height: 80%;
+			}
+			&:has(.man-business) {
+				bottom: 0;
+				right: 0;
+				height: 80%;
+			}
+		}
+		
+	}
+}
+
+
+
+
+
+
+
+///---------------------------ANIMATIONS
 @keyframes spin {
 	0% {
 		transform: rotate(0deg);
@@ -1558,6 +1732,9 @@ div[role="dialog"] {
 		transform: rotate(360deg);
 	}
 }
+
+
+///--------------------------MOBILE ADAPTATION
 @media screen and (max-width: 1244px) {
 	.closet-container {
 		grid-template-columns: repeat(4, 1fr);
@@ -1693,6 +1870,83 @@ div[role="dialog"] {
 			}
 		}
 	}
+
+	.main-section {
+		min-height: 80dvh;
+		padding: 8vw 4vw;
+		h1 {
+			font-size: 2.4rem;
+		}
+		h2 {
+			font-size: 1.75rem;
+		}
+		.button {
+			font-size: 1.2rem;
+		}
+		ul {
+			text-align: left;
+		}
+		&.second-page {
+			min-height: unset;
+			height: auto;
+		}
+	}
+	.two-col-section, .two-col-section.reverse {
+		flex-direction: column;
+		justify-content: center;
+		height: unset;
+		row-gap: 4vw;
+		text-align: center;
+
+		.text-container{
+			max-width: 100%;
+		}
+
+		&.images-container > span {
+			flex-grow: 1;
+			width: 100%;
+		}
+
+	}
+	.two-col-section .images-container, 
+.two-col-section-reverse .images-container {
+	max-width: 100%;
+	width: 100%;
+	height: auto;
+
+	img {
+		width: 100%;
+	}
+	&.absolute-container {
+		height: 100vw;
+		width: 100%;
+		span  {
+			width: auto;
+
+			&:has(.man) {
+			
+				width: 46%;
+				
+			}
+			&:has(.winter) {
+				top: 6vw;
+				right: 6vw;
+				width: 44%;
+			}
+			&:has(.summer) {
+				height: 48%;
+			}
+			&:has(.woman-casual) {
+				
+				height: 76%;
+			}
+			&:has(.man-business) {
+				height: 76%;
+			}
+		}
+		
+	}
+}
 }
 
 @media screen and (max-width: 576px) {

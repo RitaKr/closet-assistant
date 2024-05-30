@@ -70,8 +70,8 @@ function LoginForm({ isSignUp }) {
 		e.preventDefault();
 		if (isLoginInfoValid()) {
 			isSignUp
-				? signUp(form.email, form.password, setError)
-				: signIn(form.email, form.password, setError);
+				? signUp(form.email, form.password, null, setError)
+				: signIn(form.email, form.password, null, setError);
 		} else {
 			//showing invalid feedback if inputs data is invalid (unrecognized email and wrong password)
 			if (!isPasswordCorrect()) {

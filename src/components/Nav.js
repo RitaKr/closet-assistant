@@ -2,9 +2,14 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { app } from "../config";
 import { useState, useEffect } from "react";
-import { createUsername, getDisplayName, updateUser } from "../utils/AuthManipulations";
+import {
+	createUsername,
+	getDisplayName,
+	updateUser,
+} from "../utils/AuthManipulations";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // Initialize Firebase
+import { useLocation } from "react-router-dom";
 
 const auth = getAuth(app);
 
@@ -12,6 +17,8 @@ export default function Nav({ searchRef }) {
 	const navigate = useNavigate();
 	const [user, setUser] = useState(null);
 	const [searchOpen, setSearchOpen] = useState(false);
+	const location = useLocation();
+	const currentPage = location.pathname;
 
 	useEffect(() => {
 		updateUser(setUser);
@@ -19,7 +26,7 @@ export default function Nav({ searchRef }) {
 
 	onAuthStateChanged(auth, (user) => {
 		if (!user) {
-			navigate("/login");
+			navigate("/");
 		}
 	});
 	function handleSearchOpen(e) {
@@ -44,14 +51,18 @@ export default function Nav({ searchRef }) {
 					<span className="navbar-toggler-icon"></span>
 				</button>
 				{user && (
-						<NavLink
-							to="/profile"
-							className={({ isActive }) => (isActive ? "active" : "")+ " profile"}
-						>
-							<FontAwesomeIcon icon="fa-solid fa-user-large" className="user-icon" />
-							<span className="profile-info">{getDisplayName()}</span>
-						</NavLink>
-		
+					<NavLink
+						to="/profile"
+						className={({ isActive }) =>
+							(isActive ? "active" : "") + " profile"
+						}
+					>
+						<FontAwesomeIcon
+							icon="fa-solid fa-user-large"
+							className="user-icon"
+						/>
+						<span className="profile-info">{getDisplayName()}</span>
+					</NavLink>
 				)}
 				<div className="collapse navbar-collapse" id="navbarToggler">
 					<ul className="navbar-nav me-auto mb-2 mb-md-0">
@@ -70,6 +81,14 @@ export default function Nav({ searchRef }) {
 								className={({ isActive }) => (isActive ? "active" : "")}
 							>
 								Closet
+							</NavLink>
+						</li>
+						<li>
+							<NavLink
+								to="/generate"
+								className={({ isActive }) => (isActive ? "active" : "")}
+							>
+								Generate
 							</NavLink>
 						</li>
 						<li>
