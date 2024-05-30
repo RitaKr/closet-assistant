@@ -2,6 +2,9 @@ import { removeOutfit } from "../utils/DBManipulations";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DeleteButton } from "./Buttons";
 import { colors, formatDate } from "../utils/utils";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
+
 
 export default function OutfitFigure({
 	outfit,
@@ -47,8 +50,9 @@ export default function OutfitFigure({
 			</span>)}
 			{clothes.length > 0 ? (
 				clothes.map((cl) => (
-					<img
+					<LazyLoadImage
 						src={cl.imageUrl}
+						effect="blur"
 						className="outfit-item"
 						alt={cl.name}
 						key={cl.id}

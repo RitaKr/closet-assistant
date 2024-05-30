@@ -5,7 +5,8 @@ import {
 } from "../utils/DBManipulations";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { EditButton, DeleteButton } from "./Buttons";
-
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
 
 
 export default function ClothingFigure({ data, handleDialogOpen }) {
@@ -34,8 +35,9 @@ export default function ClothingFigure({ data, handleDialogOpen }) {
 				</>
 			)}
 
-			<img
+			<LazyLoadImage
 				src={data.imageUrl}
+				effect="blur"
 				className="clothing-card-image"
 				alt={data.imageName}
 			/>

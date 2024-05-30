@@ -31,7 +31,7 @@ export function signUp(email, password, displayName, setError) {
 			})
 			.catch((error) => {
 				//console.error(error)
-				setError(error);
+				if (setError) setError(error);
 				// ..
 			});
 	} catch (error) {

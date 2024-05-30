@@ -15,7 +15,8 @@ import NoClothes from "../components/NoClothes";
 import WarningAlert from "../components/WarningAlert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-function HomepageMain() {
+
+function GenerationMain() {
 	const [clothes, setClothes] = useState([]);
 	const [weatherData, setWeatherData] = useState(null);
 	const [user, setUser] = useState(null);
@@ -105,13 +106,12 @@ function HomepageMain() {
 	);
 }
 
-export default function Homepage() {
+export default function Generation() {
 	
 	return (
 		<>
-			<Header />
 			<Nav />
-			<HomepageMain />
+			<GenerationMain />
 			<Footer />
 		</>
 	);
