@@ -348,15 +348,13 @@ h3 {
 	display: flex;
 	align-items: center;
 	justify-content: space-evenly;
-	column-gap: 2vw;
+	column-gap: 4vw;
 	width: 100%;
 
 	.closet-img-container {
-		border-radius: 100%;
 		width: 50%;
 		max-width: 450px;
 
-		background: white;
 		img {
 			width: 100%;
 		}

@@ -14,6 +14,7 @@ import OutfitGeneration from "../components/OutfitGeneration";
 import NoClothes from "../components/NoClothes";
 import WarningAlert from "../components/WarningAlert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 const closet = process.env.PUBLIC_URL + '/images/wardrobe.png';
 
 function GenerationMain() {
