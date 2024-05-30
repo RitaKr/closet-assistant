@@ -1,18 +1,17 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import {signIn,signUp } from "../utils/AuthManipulations";
+import { resetPassword, signIn, signUp } from "../utils/AuthManipulations";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import InvalidFeedback from "../components/InvalidFeedback";
 import { useEffect, useState, useRef } from "react";
+import SuccessAlert from "../components/SuccessAlert";
+import Required from "../components/Required";
+import ErrorAlert from "../components/ErrorAlert";
 export default function Login({ isSignUp }) {
 	return (
 		<>
 			<div className="login-background"></div>
 			<div className="login-container">
-				{
-					/* The surrounding HTML is left untouched by FirebaseUI.
-     Your app may use that space for branding, controls and other customizations. */
-					<LoginForm isSignUp={isSignUp} />
-				}
+				<LoginForm isSignUp={isSignUp} />
 			</div>
 		</>
 	);
@@ -25,13 +24,16 @@ function LoginForm({ isSignUp }) {
 	const [form, setForm] = useState({
 		email: "",
 		password: "",
+		name: "",
 		rememberMe: false,
 	}); //form data
 	const [error, setError] = useState(null);
 	const errors = {
 		"auth/email-already-in-use": "This email is already in use",
 		"auth/invalid-login-credentials": "Invalid login credentials",
+		
 	};
+	const [message, setMessage] = useState(null); //message to show after password reset
 
 	//validation
 	function isLoginInfoValid() {
@@ -49,8 +51,7 @@ function LoginForm({ isSignUp }) {
 		const auth = getAuth();
 		onAuthStateChanged(auth, (user) => {
 			if (user) {
-				
-				console.log(user);
+				//console.log(user);
 				navigate("/");
 				// ...
 			} else {
@@ -62,15 +63,18 @@ function LoginForm({ isSignUp }) {
 		setForm({
 			email: "",
 			password: "",
+			name: "",
 			rememberMe: false,
 		});
 		setError(null);
 	}, [isSignUp]);
+
+
 	function handleSubmit(e) {
 		e.preventDefault();
 		if (isLoginInfoValid()) {
 			isSignUp
-				? signUp(form.email, form.password, setError)
+				? signUp(form.email, form.password, form.name, setError)
 				: signIn(form.email, form.password, setError);
 		} else {
 			//showing invalid feedback if inputs data is invalid (unrecognized email and wrong password)
@@ -83,26 +87,57 @@ function LoginForm({ isSignUp }) {
 		}
 	}
 
+	function handlePasswordReset(e) {
+	//console.log("reset password");
+		if (form.email && isEmailCorrect())
+			resetPassword(form.email, setError, setMessage);
+		else {
+			setMessage({type: "error", text: "Enter a valid email to get a password reset link"});
+		}
+	}
+
 	return (
 		<form id="login-form" className="login-form" onSubmit={handleSubmit}>
 			<h1 className="login-title">Outfit Generator</h1>
 			<h2 className="login-sub-title">{isSignUp ? "Sign up" : "Sign in"}</h2>
+			{isSignUp && 
+			<div className="row">
+				<div className="col-12">
+					<label htmlFor="name-input" className="form-label">
+						Display name
+					</label>
+					<input
+						type="text"
+						id="name-input"
+						className={"form-control form-input " + (error ? "is-invalid" : "")}
+						placeholder="Enter your name or create username"
+						ref={emailInput}
+						autoComplete="username"
+						onChange={(e) => {
+							setForm({ ...form, name: e.target.value });
+							setMessage(null);
+							e.target.classList.remove("is-invalid");
+						}}
+						value={form.name}
+					/>
+				</div>
+			</div>}
 			<div className="row">
 				<div className="col-12">
 					<label htmlFor="email-input" className="form-label">
-						Email
+						Email <Required/>
 					</label>
 					<input
 						type="email"
 						id="email-input"
-						className={
-							"form-control form-input " + (error ? "is-invalid" : "")
-						}
-						placeholder="Enter your login"
+						className={"form-control form-input " + (error ? "is-invalid" : "")}
+						placeholder="Enter your email"
 						required
 						ref={emailInput}
+						autoComplete="email"
 						onChange={(e) => {
 							setForm({ ...form, email: e.target.value });
+							setMessage(null);
 							e.target.classList.remove("is-invalid");
 						}}
 						value={form.email}
@@ -113,7 +148,7 @@ function LoginForm({ isSignUp }) {
 			<div className="row">
 				<div className="col-12">
 					<label htmlFor="password-input" className="form-label">
-						Password
+						Password <Required/>
 					</label>
 					<input
 						type="password"
@@ -128,14 +163,15 @@ function LoginForm({ isSignUp }) {
 						value={form.password}
 						pattern="(?=.*\d)(?=.*[a-z]).{8,}"
 						title="Password must be at least 8 characters long and include at least one number and letter"
+						autoComplete={isSignUp? "new-password": "current-password"}
 						onChange={(e) => {
 							//showing invalid feedback message if password is too short
-
+							setMessage(null);
 							setForm({
 								...form,
 								password: e.target.value,
 							});
-                            e.target.classList.remove("is-invalid");
+							e.target.classList.remove("is-invalid");
 						}}
 					/>
 
@@ -169,8 +205,19 @@ function LoginForm({ isSignUp }) {
 							? "Already have an account? Sign in"
 							: "Don't have an account? Sign up"}{" "}
 					</NavLink>
+					{!isSignUp && (
+						<NavLink to="#" className={"link"} onClick={handlePasswordReset}>
+							Forgot password? Sent reset link
+						</NavLink>
+					)}
 				</div>
 			</div>
+
+			{message && 
+			(message.type==="success" ? 
+			<SuccessAlert>{message.text}</SuccessAlert> :
+			<ErrorAlert>{message.text}</ErrorAlert>)
+			}
 		</form>
 	);
 }

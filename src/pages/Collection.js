@@ -8,7 +8,7 @@ import {
 	getCollections,
 	updateCollection,
     removeCollection,
-} from "../utils/DBmanipulations";
+} from "../utils/DBManipulations";
 import { updateUser } from "../utils/AuthManipulations";
 import { onChildChanged, onChildRemoved, ref } from "firebase/database";
 import Loader from "../components/Loader";

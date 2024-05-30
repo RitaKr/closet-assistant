@@ -88,7 +88,7 @@ export default function Header() {
 	function handleBGChange(e) {
 		let i = parseInt(e.target.dataset.i);
 		//console.log('e.target', e.target)
-		console.log("i", i, "lastClick", lastClick);
+		//console.log("i", i, "lastClick", lastClick);
 		if (lastClick > i) {
 			slide("jpg", i + 1 - count, false);
 		} else if (lastClick < i) {
