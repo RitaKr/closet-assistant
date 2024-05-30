@@ -583,57 +583,11 @@ select {
 
 
 
-///---------------------------------------FORM
-.form-input {
-	border: none;
-	//border-radius: 5px;
-	border-radius: 0;
-	background: none;
-	padding: 6px 8px;
-	border-bottom: 2px $main-col solid;
-	transition: all 0.3s ease;
-	color: $main-col-darker;
-
-	&::placeholder {
-		color: $main-col;
-	}
-	&:focus {
-		outline: none !important;
-		border: inherit;
-		border-bottom: 2px $main-col solid;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 5px;
-		box-shadow: 0 0 5px rgba($main-col, 0.5);
-	}
-	& option {
-		background: $main-col-lighter;
-	}
+////////// CLOSET PAGE //////////
+.contacts {
+	font-size: 1.2rem;
+	color: $main-col-lighter;
 }
-.red {
-	color: rgb(185, 0, 0);
-	font-size: 1rem;
-}
-.form-label {
-	padding: 0px;
-	font-weight: 500;
-	margin: 0.5rem 0;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//------------------------CLOSET PAGE-----------------
 .items-count {
 	text-align: left;
 	color: $main-col-lighter;
@@ -1284,49 +1238,112 @@ div[role="dialog"] {
 
 
 ///-----------------------PROFILE------------
-.profile-container {
+.outfits-container {
+	width: 100%;
+	padding: 20px;
+	border-radius: 10px;
 	display: flex;
-	flex-direction: column;
-	align-items: center;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: stretch;
 	gap: 10px;
+	min-height: 300px;
+	color: $main-col-lighter;
 
-	.profile-details {
-		color: $main-col-lighter;
+
+	.outfit {
+		padding-top: 32px;
+		background-color: $main-col-lighter;
+		width: 240px;
+		height: fit-content;
+		overflow: hidden;
+		transition: filter 0.4s ease;
+		height: auto;
 	}
-
-}
-.editable-title {
-	position: relative;
-	display: flex;
-	align-items: center;
-	column-gap: 0.3em;
-	row-gap: 10px;
-
-	.icon-btn {
+	.outfit-item {
+		height: 90px;
+	}
+	.tag {
+		position: absolute;
+		font-size: 0.85rem;
+		line-height: 1rem;
+		font-weight: 400;
+		padding: 4px 8px;
+		color: lighten($main-col-lighter, 10%);
+	}
+	.outfit-date {
+		background: $main-col;
+		
+		left: 0;
+		top: 0;
+		border-radius: 0 0 10px 0;
+		box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+	}
+	.additional-tags {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		:last-child {
+			border-radius: 0 10px 0 0;
+		}
+	}
+	.outfit-style {
 		position: relative;
-		margin: 0;
-		svg {
-			font-size: 1rem;
+		background: $main-col-darker;
+		box-shadow: 1px -1px 3px rgba(0, 0, 0, 0.1);
+	}
+	.outfit-color {
+		position: relative;
+		text-shadow: 0px 0px 2px black;
+		border-top: 1px solid $text-col; 
+		color: $text-col;
+		box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
+
+		&:last-child{
+			border-right: 1px solid $text-col; 
+			box-shadow: 1px -1px 3px rgba(0, 0, 0, 0.1);
 		}
 	}
 
-	input {
-		background: inherit;
-		color: inherit;
-		border: none;
-		font-weight: inherit;
-		border-bottom: 2px solid $main-col-lighter;
-		color: $main-col-lighter;
-		font-size: 1rem;
-		height: 100%;
-		padding: 8px;
-		width: 250px;
+	.outfit-temp {
+		right: 0;
+		bottom: 0;
+		background: $main-col;
+		border-radius: 10px 0  0 0;
+		box-shadow: -1px -1px 3px rgba(0, 0, 0, 0.1);
 	}
 }
-.profile-value {
-	font-weight: 400;
-	color: $text-col;
+
+.breadcrumbs {
+	display: flex;
+	align-items: left;
+	gap: 12px;
+	color: rgba(#ffffff, 0.6);
+	font-weight: 300;
+	width: 100%;
+	margin-bottom: 10px;
+	a {
+		color: $main-col-lighter;
+
+		&:hover {
+			text-decoration: underline;
+			text-decoration-thickness: 1px;
+		}
+	}
+	.active {
+		color: $main-col-lighter;
+		font-weight: 400;
+	}
 }
+
+
+
+
+
+
+
+
+
 
 
 //---------------------CALENDAR--------------------
@@ -1398,6 +1415,141 @@ div[role="dialog"] {
 
 
 ///---------------------------ANIMATIONS
+
+.add-collection-form {
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	border-top: 2px solid $bg-col;
+
+	.button {
+		margin-right: 10px;
+	}
+}
+
+.info {
+	text-align: left;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+
+	.icons {
+		font-size: 2rem;
+	}
+	svg {
+		color: lighten($main-col, 15%);
+	}
+}
+
+.collections-wrapper {
+	padding: 20px 0;
+	text-align: center;
+	width: 100%;
+
+	.collections-container {
+		margin: 20px 0;
+
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 20px;
+
+		a {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 10px;
+			padding: 12px 18px;
+			border-radius: 10px;
+			background: $main-col;
+			color: $text-col;
+			text-decoration: none;
+			transition: all 0.3s ease;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+
+			&:hover {
+				background: lighten($main-col, 10%);
+
+				& > svg {
+					transform: translateX(5px);
+				}
+			}
+
+
+
+
+
+///--------------------------MOBILE ADAPTATION
+
+
+			h3 {
+				font-size: 1.4rem;
+				margin: 0;
+			}
+
+			span {
+				font-size: 0.9rem;
+				color: $main-col-lighter;
+				text-wrap: nowrap;
+			}
+
+			& > svg {
+				font-size: 1.5rem;
+				transition: all 0.3s ease;
+			}
+		}
+	}
+}
+
+.wrapper {
+	margin: 10px 0;
+	text-align: center;
+}
+
+.profile-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+
+	.profile-details {
+		color: $main-col-lighter;
+	}
+
+}
+.editable-title {
+	position: relative;
+	display: flex;
+	align-items: center;
+	column-gap: 0.3em;
+	row-gap: 10px;
+
+	.icon-btn {
+		position: relative;
+		margin: 0;
+		svg {
+			font-size: 1rem;
+		}
+	}
+
+	input {
+		background: inherit;
+		color: inherit;
+		border: none;
+		font-weight: inherit;
+		border-bottom: 2px solid $main-col-lighter;
+		color: $main-col-lighter;
+		font-size: 1rem;
+		height: 100%;
+		padding: 8px;
+		width: 250px;
+	}
+}
+.profile-value {
+	font-weight: 400;
+	color: $text-col;
+}
+
 @keyframes spin {
 	0% {
 		transform: rotate(0deg);
@@ -1406,13 +1558,6 @@ div[role="dialog"] {
 		transform: rotate(360deg);
 	}
 }
-
-
-
-
-
-///--------------------------MOBILE ADAPTATION
-
 @media screen and (max-width: 1244px) {
 	.closet-container {
 		grid-template-columns: repeat(4, 1fr);

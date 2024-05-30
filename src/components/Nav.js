@@ -72,7 +72,14 @@ export default function Nav({ searchRef }) {
 								Closet
 							</NavLink>
 						</li>
-
+						<li>
+							<NavLink
+								to="/collections"
+								className={({ isActive }) => (isActive ? "active" : "")}
+							>
+								Collections
+							</NavLink>
+						</li>
 						<li>
 							<NavLink
 								to="/calendar"
