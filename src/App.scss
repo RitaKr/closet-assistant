@@ -950,7 +950,7 @@ div[role="dialog"] {
 }
 
 ////------------------------------------------FORM
-.form-input {
+.form-input  {
 	border: none;
 	//border-radius: 5px;
 	border-radius: 0;
@@ -974,7 +974,15 @@ div[role="dialog"] {
 	& option {
 		background: $main-col-lighter;
 	}
-	
+	&.text-lighter {
+		color: $main-col-lighter;
+		font-weight: 400;
+
+		& option {
+			background: $bg-col;
+			font-size: 1.2rem;
+		}
+	}
 	
 }
 .red {
@@ -1170,7 +1178,9 @@ div[role="dialog"] {
 	justify-content: center;
 	align-items: center;
 	height: 100%;
-	position: absolute;
+	position: fixed;
+	//backdrop-filter: blur(4px);
+	background: rgba(0, 0, 0, 0.6);
 	top: 0;
 	left: 0;
 	width: 100%;
