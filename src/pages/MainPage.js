@@ -9,6 +9,7 @@ import womanCasual from "../assets/images/woman-casual.jpg";
 import manBusiness from "../assets/images/man-business.jpg";
 import jackets from "../assets/images/jackets.jpg";
 import shelves from "../assets/images/shelves.jpg";
+import tripPacker from "../assets/images/trip-packer.png";
 import { useEffect, useState } from "react";
 import { updateUser } from "../utils/AuthManipulations";
 import { Link, NavLink } from "react-router-dom";
@@ -136,6 +137,21 @@ function Page({ user }) {
 			</section>
 
 			<section className="sixth-page main-section">
+				<div className="trip-packer">
+					<h1>Prepare for a trip with Closet Assistant</h1>
+					<h2>Choose trip dates and get a collection of clothes that you can take</h2>
+				</div>
+				<div className="image-container trip-packer-photo">
+					<LazyLoadImage
+						alt="trip packer"
+						effect="blur"
+						className="trip-packer"
+						src={tripPacker}
+					/>
+				</div>
+			</section>
+
+			<section className="seventh-page main-section">
 				<div className="start-using">
 					<h1>Closet assistant</h1>
 					<h2>Start expressing yourself with comfort NOW</h2>
