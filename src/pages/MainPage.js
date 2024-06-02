@@ -19,6 +19,7 @@ const womanCasual = process.env.PUBLIC_URL + "/images/woman-casual.jpg";
 const manBusiness = process.env.PUBLIC_URL + "/images/man-business.jpg";
 const jackets = process.env.PUBLIC_URL + "/images/jackets.jpg";
 const shelves = process.env.PUBLIC_URL + "/images/shelves.jpg";
+const tripPacker = process.env.PUBLIC_URL + "/images/trip-packer.png";
 
 function Page({ user }) {
 	return (
@@ -144,6 +145,21 @@ function Page({ user }) {
 			</section>
 
 			<section className="sixth-page main-section">
+				<div className="trip-packer text-container">
+					<h1>Prepare for a trip with Closet Assistant</h1>
+					<h2>Select the dates of your trip and get a personalised collection of clothes for it</h2>
+				</div>
+				<div className="images-container trip-packer-photo">
+					<LazyLoadImage
+						alt="trip packer"
+						effect="blur"
+						className="trip-packer"
+						src={tripPacker}
+					/>
+				</div>
+			</section>
+
+			<section className="seventh-page main-section">
 				<div className="start-using">
 					<h1>Closet assistant</h1>
 					<h2>Start expressing yourself with comfort NOW</h2>
