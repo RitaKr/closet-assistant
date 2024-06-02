@@ -4,14 +4,14 @@ import { weatherConditions } from "./utils";
 const currentTime = new Date();
 export const thisHour = currentTime.getHours();
 export const hours = Array.from(
-	{ length: 24 - thisHour  },
-	(_, i) => (1 + thisHour + i) 
+	{ length: 24 - thisHour },
+	(_, i) => 1 + thisHour + i
 );
 
-async function fetchForecastData(setWeatherData) {
+async function fetchForecastData(setWeatherData, coordinates, start_date, end_date) {
 	const params = {
-		latitude: 50.4547,
-		longitude: 30.5238,
+		latitude: coordinates ? coordinates.lat : 50.4547,
+		longitude: coordinates ? coordinates.lng : 30.5238,
 		hourly: [
 			"apparent_temperature",
 			"precipitation_probability",
@@ -25,13 +25,24 @@ async function fetchForecastData(setWeatherData) {
 			"apparent_temperature_max",
 			"apparent_temperature_min",
 		],
-		forecast_days: 14,
+        
+		
 	};
-	await navigator.geolocation.getCurrentPosition((position) => {
-		const { latitude, longitude } = position.coords;
-		params.latitude = latitude;
-		params.longitude = longitude;
-	});
+    if (start_date && end_date) {
+        params.start_date = start_date;
+        params.end_date = end_date;
+    
+    } else {
+        params.forecast_days = 14;
+    }
+
+	if (!coordinates) {
+		await navigator.geolocation.getCurrentPosition((position) => {
+			const { latitude, longitude } = position.coords;
+			params.latitude = latitude;
+			params.longitude = longitude;
+		});
+	}
 	const url = "https://api.open-meteo.com/v1/forecast";
 	const responses = await fetchWeatherApi(url, params);
 
@@ -45,14 +56,14 @@ async function fetchForecastData(setWeatherData) {
 	const weatherData = {
 		hourly: {
 			apparentTemperature: Array.from(hourly.variables(0).valuesArray()),
-			precipitationProbability: Array.from(
-				hourly.variables(1).valuesArray()
-			),
+			precipitationProbability: Array.from(hourly.variables(1).valuesArray()),
 			precipitation: Array.from(hourly.variables(2).valuesArray()),
 			snowfall: Array.from(hourly.variables(3).valuesArray()),
 			//weatherCode: Array.from(hourly.variables(4).valuesArray()).slice(0, 24),
 			windSpeed10m: Array.from(hourly.variables(5).valuesArray()),
-            condition: Array.from(hourly.variables(4).valuesArray()).map(c=> { return{code: c, text: weatherConditions[c]}}),
+			condition: Array.from(hourly.variables(4).valuesArray()).map((c) => {
+				return { code: c, text: weatherConditions[c] };
+			}),
 		},
 		current: {
 			apparentTemperature: Array.from(hourly.variables(0).valuesArray())[
@@ -65,18 +76,26 @@ async function fetchForecastData(setWeatherData) {
 			snowfall: Array.from(hourly.variables(3).valuesArray())[thisHour],
 			//weatherCode: Array.from(hourly.variables(4).valuesArray())[thisHour],
 			windSpeed10m: Array.from(hourly.variables(5).valuesArray())[thisHour],
-            condition: {
-                code: Array.from(hourly.variables(4).valuesArray())[thisHour],
-                text: weatherConditions[Array.from(hourly.variables(4).valuesArray())[thisHour]],
-            },
+			condition: {
+				code: Array.from(hourly.variables(4).valuesArray())[thisHour],
+				text: weatherConditions[
+					Array.from(hourly.variables(4).valuesArray())[thisHour]
+				],
+			},
 		},
-		daily : Array.from(daily.variables(0).valuesArray()).map((uvIndexMax, index) => {
-        return {
-            uvIndexMax: uvIndexMax,
-            apparentTemperatureMax: Array.from(daily.variables(1).valuesArray())[index],
-            apparentTemperatureMin: Array.from(daily.variables(2).valuesArray())[index],
-        };
-        }),
+		daily: Array.from(daily.variables(0).valuesArray()).map(
+			(uvIndexMax, index) => {
+				return {
+					uvIndexMax: uvIndexMax,
+					apparentTemperatureMax: Array.from(daily.variables(1).valuesArray())[
+						index
+					],
+					apparentTemperatureMin: Array.from(daily.variables(2).valuesArray())[
+						index
+					],
+				};
+			}
+		),
 		apparentTemperatureMax: Array.from(daily.variables(1).valuesArray())[0],
 		apparentTemperatureMin: Array.from(daily.variables(2).valuesArray())[0],
 		uvIndexMax: Array.from(daily.variables(0).valuesArray())[0],
@@ -85,33 +104,32 @@ async function fetchForecastData(setWeatherData) {
 
 	//console.log(thisHour)
 
-    
-//     const thisHourForecast = {
-//         apparentTemperature: weatherData.hourly.apparentTemperature[thisHour],
-//         precipitationProbability:
-//             weatherData.hourly.precipitationProbability[thisHour],
-//         precipitation: weatherData.hourly.precipitation[thisHour],
-//         snowfall: weatherData.hourly.snowfall[thisHour],
-//         condition: {
-//             code: weatherData.hourly.weatherCode[thisHour],
-//             text: weatherConditions[weatherData.hourly.weatherCode[thisHour]],
-//         },
+	//     const thisHourForecast = {
+	//         apparentTemperature: weatherData.hourly.apparentTemperature[thisHour],
+	//         precipitationProbability:
+	//             weatherData.hourly.precipitationProbability[thisHour],
+	//         precipitation: weatherData.hourly.precipitation[thisHour],
+	//         snowfall: weatherData.hourly.snowfall[thisHour],
+	//         condition: {
+	//             code: weatherData.hourly.weatherCode[thisHour],
+	//             text: weatherConditions[weatherData.hourly.weatherCode[thisHour]],
+	//         },
 
-//         windSpeed10m: weatherData.hourly.windSpeed10m[thisHour],
-//         apparentTemperatureMax: weatherData.daily.apparent_temperature_max[0],
-//         apparentTemperatureMin: weatherData.daily.apparent_temperature_min[0],
-//         uvIndexMax: weatherData.daily.uv_index_max[0],
-//         forecast: weatherData.daily.apparent_temperature_max.map((item, i) => {
-//             return {
-//                 "apparentTemperatureMax": weatherData.daily.apparent_temperature_max[i],
-//                 "apparentTemperatureMin": weatherData.daily.apparent_temperature_min[i],
-//                 "uvIndexMax": weatherData.daily.uv_index_max[i],
-//             }
-// })
-//     };
-    
-    setWeatherData(weatherData);
-    //console.log("weather forecast: ",thisHourForecast.forecast);
+	//         windSpeed10m: weatherData.hourly.windSpeed10m[thisHour],
+	//         apparentTemperatureMax: weatherData.daily.apparent_temperature_max[0],
+	//         apparentTemperatureMin: weatherData.daily.apparent_temperature_min[0],
+	//         uvIndexMax: weatherData.daily.uv_index_max[0],
+	//         forecast: weatherData.daily.apparent_temperature_max.map((item, i) => {
+	//             return {
+	//                 "apparentTemperatureMax": weatherData.daily.apparent_temperature_max[i],
+	//                 "apparentTemperatureMin": weatherData.daily.apparent_temperature_min[i],
+	//                 "uvIndexMax": weatherData.daily.uv_index_max[i],
+	//             }
+	// })
+	//     };
+
+	setWeatherData(weatherData);
+	//console.log("weather forecast: ",thisHourForecast.forecast);
 }
 
 export function parseTempRange(rangeStr) {
@@ -266,7 +284,7 @@ async function generateOutfit(outfitOptions, baseOutfit) {
 	//console.log(outfitOptions);
 
 	if (typeof baseOutfit !== "undefined" && baseOutfit !== null) {
-       //console.log("in generateOutfit: ", outfitOptions, baseOutfit)
+		//console.log("in generateOutfit: ", outfitOptions, baseOutfit)
 		//const keys = Object.keys(outfitOptions);
 		const newOutfit = baseOutfit.filter((clothing) =>
 			Object.values(outfitOptions).some((options) => options.includes(clothing))
@@ -310,4 +328,4 @@ async function generateOutfit(outfitOptions, baseOutfit) {
 	}
 }
 
-export { fetchForecastData, generateOutfit, filterClothesForWeather };
+export { fetchForecastData, generateOutfit, filterClothesForWeather, randomItem };

@@ -16,6 +16,7 @@ import Loader from "./components/Loader";
 import { updateUser } from "./utils/AuthManipulations";
 import { onChildChanged, onChildRemoved, onChildAdded, ref } from "firebase/database";
 import Profile from "./pages/Profile";
+import Trip from "./pages/Trip";
 
 export default function App(){
     const [collections, setCollections] = useState(null);
@@ -87,6 +88,7 @@ export default function App(){
             return (
             <Route key={i} path={`/collections/${collection.slug}`} element={<Collection collection={collection} />} />
           )})}
+          <Route path="/trip-packer" element={<Trip />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
         

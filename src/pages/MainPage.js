@@ -7,18 +7,18 @@ import { Link, NavLink } from "react-router-dom";
 import Nav from "../components/Nav";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 //importing images
 const clothing = process.env.PUBLIC_URL + "/images/clothing.jpg";
-const  man = process.env.PUBLIC_URL + "/images/man.jpg";
-const  winter = process.env.PUBLIC_URL + "/images/winter.jpg";
-const  summer = process.env.PUBLIC_URL + "/images/summer.jpg";
+const man = process.env.PUBLIC_URL + "/images/man.jpg";
+const winter = process.env.PUBLIC_URL + "/images/winter.jpg";
+const summer = process.env.PUBLIC_URL + "/images/summer.jpg";
 const calendar = process.env.PUBLIC_URL + "/images/calendar.jpg";
 const womanCasual = process.env.PUBLIC_URL + "/images/woman-casual.jpg";
 const manBusiness = process.env.PUBLIC_URL + "/images/man-business.jpg";
 const jackets = process.env.PUBLIC_URL + "/images/jackets.jpg";
 const shelves = process.env.PUBLIC_URL + "/images/shelves.jpg";
-
 
 function Page({ user }) {
 	return (
@@ -32,12 +32,17 @@ function Page({ user }) {
 					</h2>
 					{user ? (
 						<NavLink className="button" to="/generate">
-							Generate outfit
+							<FontAwesomeIcon icon="fa-solid fa-wand-magic-sparkles" className="icon"/> Generate outfit
 						</NavLink>
 					) : (
-						<NavLink className="button" to="/signup">
-							Sign up
-						</NavLink>
+						<div className="action-panel justify-content-start">
+							<NavLink className="button" to="/signup">
+								Sign up
+							</NavLink>
+							<NavLink className="button button-secondary" to="/login">
+								Log in
+							</NavLink>
+						</div>
 					)}
 				</div>
 
@@ -66,7 +71,6 @@ function Page({ user }) {
 						effect="blur"
 						className="winter"
 						src={winter}
-                        
 					/>
 					<LazyLoadImage
 						alt="summer"

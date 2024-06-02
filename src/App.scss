@@ -245,8 +245,10 @@ a {
 	border: none;
 	color: $text-col;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+	border: 2px solid $main-col;
 	&:hover:not(:disabled) {
 		background: lighten($main-col, 10%);
+		border-color: lighten($main-col, 10%);
 		//box-shadow: 0 0 10px lighten($main-col, 10%);
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 	}
@@ -255,7 +257,22 @@ a {
 		background: darken($red, 20%);
 	
 	}
+	&.button-secondary {
+
+		background: none;
+		font-weight: 400;
+		border-color: $main-col;
+		color: $main-col;
+		&:hover:not(:disabled) {
+			background: $main-col;
+			border-color: $main-col;
+			color: $text-col;
+
+		}
+		
+	}
 }
+
 button:disabled {
 	&:hover {
 		transform: scale(1);
@@ -424,7 +441,7 @@ margin: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 5px;
+	gap: 8px;
 }
 .add-to-collection-btn {
 	position: relative;
@@ -988,6 +1005,13 @@ div[role="dialog"] {
 .red {
 	color: $dark-red ;
 	font-size: 1rem;
+}
+.form-info {
+	color: $main-col-lighter ;
+	font-size: 1rem;
+}
+p.form-info, p.red {
+	margin: 5px 0;
 }
 .form-label {
 	padding: 0px;
@@ -1606,6 +1630,11 @@ div[role="dialog"] {
 	.button {
 		font-size: 1.5rem;
 		display: inline-block;
+
+		.icon {
+			font-size: 0.85em;
+			font-weight: 300;
+		}
 	}
 
 	ul {

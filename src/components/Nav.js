@@ -107,6 +107,14 @@ export default function Nav({ searchRef }) {
 								Outfits calendar
 							</NavLink>
 						</li>
+						<li>
+							<NavLink
+								to="/trip-packer"
+								className={({ isActive }) => (isActive ? "active" : "")}
+							>
+								Trip packer
+							</NavLink>
+						</li>
 					</ul>
 				</div>
 			</div>

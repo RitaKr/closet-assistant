@@ -494,6 +494,11 @@ export default function AddClothingDialog({
 					)}
 					<div className="row">
 						<div className="col-12">
+							<p className="red">* - Required fields</p>
+						</div>
+					</div>
+					<div className="row">
+						<div className="col-12">
 							<button
 								type="submit"
 								className="button"
