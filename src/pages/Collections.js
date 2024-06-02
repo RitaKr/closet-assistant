@@ -24,7 +24,6 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { createSlug, validCollectionName } from "../utils/utils";
 
-
 export default function Collections() {
 	const [user, setUser] = useState(null);
 	const [formData, setFormData] = useState({
@@ -69,8 +68,6 @@ export default function Collections() {
 		}
 	}, [user]);
 
-	
-
 	function handleSubmit(e) {
 		e.preventDefault();
 		if (formData.valid) {
@@ -78,7 +75,7 @@ export default function Collections() {
 				writeCollection({
 					name: formData.name.trim(),
 					slug: createSlug(formData.name),
-					outfits: []
+					outfits: [],
 				});
 				setFormData({ valid: false, name: "", isNameTouched: false });
 				setFormSubmitted(true);
@@ -133,7 +130,10 @@ export default function Collections() {
 											value={formData.name}
 											onChange={(e) => {
 												setFormData({
-													valid: validCollectionName(e.target.value, collections),
+													valid: validCollectionName(
+														e.target.value,
+														collections
+													),
 													isNameTouched: true,
 													name: e.target.value,
 												});
@@ -144,6 +144,11 @@ export default function Collections() {
 												? "Collection with this name already exists"
 												: "Name can't be empty"}
 										</InvalidFeedback>
+									</div>
+								</div>
+								<div className="row">
+									<div className="col-12">
+										<p className="red">* - Required fields</p>
 									</div>
 								</div>
 								<div className="row">
@@ -184,35 +189,38 @@ export default function Collections() {
 							{collections.length > 0 ? (
 								<div className="collections-container">
 									{collections.map((collection) => {
-										
 										return (
-										<Link
-											to={`/collections/${collection.slug}`}
-											key={collection.slug}
-										>
-											<div className="info">
-												{collection.name === "Favorites" && (
-													<span className="icons">
-														<FontAwesomeIcon icon="fa-solid fa-star" />
-													</span>
-												)}
-												<div>
-													<h3>{collection.name}</h3>
-													<span className="add-date">
-														Created on{" "}
-														{new Date(collection.addDate).toLocaleDateString()}
-													</span>{" "}
-													|{" "}
-													<span>
-														Has{" "}
-														{getOutfitsCount(collection.outfits)}{" "}
-														outfit{getOutfitsCount(collection.outfits) === 1 ? "" : "s"}
-													</span>
+											<Link
+												to={`/collections/${collection.slug}`}
+												key={collection.slug}
+											>
+												<div className="info">
+													{collection.name === "Favorites" && (
+														<span className="icons">
+															<FontAwesomeIcon icon="fa-solid fa-star" />
+														</span>
+													)}
+													<div>
+														<h3>{collection.name}</h3>
+														<span className="add-date">
+															Created on{" "}
+															{new Date(
+																collection.addDate
+															).toLocaleDateString()}
+														</span>{" "}
+														|{" "}
+														<span>
+															Has {getOutfitsCount(collection.outfits)} outfit
+															{getOutfitsCount(collection.outfits) === 1
+																? ""
+																: "s"}
+														</span>
+													</div>
 												</div>
-											</div>
-											<FontAwesomeIcon icon="fa-solid fa-chevron-right" />
-										</Link>
-									)})}
+												<FontAwesomeIcon icon="fa-solid fa-chevron-right" />
+											</Link>
+										);
+									})}
 								</div>
 							) : (
 								<div className="outfits-container">

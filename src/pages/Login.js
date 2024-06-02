@@ -195,6 +195,11 @@ function LoginForm({ isSignUp }) {
                 </div>
             </div>
                         */}
+						<div className="row">
+						<div className="col-12">
+							<p className="red">* - Required fields</p>
+						</div>
+					</div>
 			<div className="row">
 				<div className="col-12 center-alignment">
 					<button type="submit" className="button login-btn">

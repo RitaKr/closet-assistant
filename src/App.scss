@@ -245,8 +245,10 @@ a {
 	border: none;
 	color: $text-col;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+	border: 2px solid $main-col;
 	&:hover:not(:disabled) {
 		background: lighten($main-col, 10%);
+		border-color: lighten($main-col, 10%);
 		//box-shadow: 0 0 10px lighten($main-col, 10%);
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 	}
@@ -255,7 +257,22 @@ a {
 		background: darken($red, 20%);
 	
 	}
+	&.button-secondary {
+
+		background: none;
+		font-weight: 400;
+		border-color: $main-col;
+		color: $main-col;
+		&:hover:not(:disabled) {
+			background: $main-col;
+			border-color: $main-col;
+			color: $text-col;
+
+		}
+		
+	}
 }
+
 button:disabled {
 	&:hover {
 		transform: scale(1);
@@ -348,15 +365,13 @@ h3 {
 	display: flex;
 	align-items: center;
 	justify-content: space-evenly;
-	column-gap: 2vw;
+	column-gap: 4vw;
 	width: 100%;
 
 	.closet-img-container {
-		border-radius: 100%;
 		width: 50%;
 		max-width: 450px;
 
-		background: white;
 		img {
 			width: 100%;
 		}
@@ -426,7 +441,7 @@ margin: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 5px;
+	gap: 8px;
 }
 .add-to-collection-btn {
 	position: relative;
@@ -952,7 +967,7 @@ div[role="dialog"] {
 }
 
 ////------------------------------------------FORM
-.form-input {
+.form-input  {
 	border: none;
 	//border-radius: 5px;
 	border-radius: 0;
@@ -976,12 +991,27 @@ div[role="dialog"] {
 	& option {
 		background: $main-col-lighter;
 	}
-	
+	&.text-lighter {
+		color: $main-col-lighter;
+		font-weight: 400;
+
+		& option {
+			background: $bg-col;
+			font-size: 1.2rem;
+		}
+	}
 	
 }
 .red {
 	color: $dark-red ;
 	font-size: 1rem;
+}
+.form-info {
+	color: $main-col-lighter ;
+	font-size: 1rem;
+}
+p.form-info, p.red {
+	margin: 5px 0;
 }
 .form-label {
 	padding: 0px;
@@ -1172,7 +1202,9 @@ div[role="dialog"] {
 	justify-content: center;
 	align-items: center;
 	height: 100%;
-	position: absolute;
+	position: fixed;
+	//backdrop-filter: blur(4px);
+	background: rgba(0, 0, 0, 0.6);
 	top: 0;
 	left: 0;
 	width: 100%;
@@ -1598,6 +1630,11 @@ div[role="dialog"] {
 	.button {
 		font-size: 1.5rem;
 		display: inline-block;
+
+		.icon {
+			font-size: 0.85em;
+			font-weight: 300;
+		}
 	}
 
 	ul {

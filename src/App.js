@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-import Generation from './pages/Homepage';
+import Generate from './pages/Generate';
 import Closet from './pages/Closet';
 import Login from './pages/Login';
 import MainPage from './pages/MainPage';
@@ -16,6 +16,7 @@ import Loader from "./components/Loader";
 import { updateUser } from "./utils/AuthManipulations";
 import { onChildChanged, onChildRemoved, onChildAdded, ref } from "firebase/database";
 import Profile from "./pages/Profile";
+import Trip from "./pages/Trip";
 
 export default function App(){
     const [collections, setCollections] = useState(null);
@@ -75,7 +76,7 @@ export default function App(){
         <Routes>
           <Route path="/login" element={<Login isSignUp={false} />} />
           <Route path="/signup" element={<Login isSignUp={true} />} />
-          <Route path="/generate" element={<Generation />} />
+          <Route path="/generate" element={<Generate />} />
           <Route path="/closet" element={<Closet />} />
 
             <Route path="/" element={<MainPage />} />
@@ -87,6 +88,7 @@ export default function App(){
             return (
             <Route key={i} path={`/collections/${collection.slug}`} element={<Collection collection={collection} />} />
           )})}
+          <Route path="/trip-packer" element={<Trip />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
         

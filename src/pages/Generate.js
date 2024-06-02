@@ -1,23 +1,25 @@
 import Header from "../components/Header";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
-import closet from "../assets/images/closet.png";
+
 import { getClothes, } from "../utils/DBManipulations";
 import "firebase/database";
 
 import { useState, useEffect } from "react";
 
 //import { weatherApiKey } from "../weatherApiKey";
-import { fetchForecastData } from "../utils/WeatherApi";
+import { fetchForecastData, thisHour } from "../utils/WeatherApi";
 import { auth, updateUser } from "../utils/AuthManipulations";
 import OutfitGeneration from "../components/OutfitGeneration";
 import NoClothes from "../components/NoClothes";
 import WarningAlert from "../components/WarningAlert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Loader from "../components/Loader";
 
+const closet = process.env.PUBLIC_URL + '/images/wardrobe.png';
 
 function GenerationMain() {
-	const [clothes, setClothes] = useState([]);
+	const [clothes, setClothes] = useState(null);
 	const [weatherData, setWeatherData] = useState(null);
 	const [user, setUser] = useState(null);
 	useEffect(() => {
@@ -29,7 +31,6 @@ function GenerationMain() {
 		if (user) {
 			getClothes().then((data) => {
 		//console.log("clothes fetched", data);
-
 				setClothes(data);
 			
 			});
@@ -40,6 +41,11 @@ function GenerationMain() {
 		
 	}, []);
 
+	function getMax(arr) {
+		return arr.reduce((max, value, i) => {
+			return value > max.val ? {val: value, i: i } : max;
+		  }, { val: -Infinity, i: -1 });
+	}
 
 	return (
 		<main className="page-main">
@@ -50,27 +56,28 @@ function GenerationMain() {
 
 				<section className="generate-outfit-area">
 					{weatherData &&
-						weatherData.condition.text &&
-						weatherData.apparentTemperature && (
+						weatherData.current.condition.text &&
+						weatherData.current.apparentTemperature && (
 							<>
 							<h2 className="page-sub-title">
-								{weatherData.condition.text}. Feels like{" "}
-								{weatherData.apparentTemperature.toFixed(1)} C°
+								{weatherData.current.condition.text}. Feels like{" "}
+								{weatherData.current.apparentTemperature.toFixed(1)} C°
 							</h2>
 							<div className="warning-messages-container">
 								{
-									((weatherData.condition.code >=51 && weatherData.condition.code <= 67) || (weatherData.condition.code >= 80 && weatherData.condition.code <= 82)  || (weatherData.condition.code >= 95 && weatherData.condition.code <= 99)) &&
+									(weatherData.hourly.condition.slice(thisHour, 23).some(item => (item.code >=51 && item.code <= 67) || (item.code >= 80 && item.code <= 82) || (item.code >=95 && item.code <= 99))) &&
 									<WarningAlert>
 										<span className="icons">
 											<FontAwesomeIcon icon="fa-solid fa-cloud-showers-heavy" /> <FontAwesomeIcon icon="fa-solid fa-umbrella" />
 										</span> 
-										You should take an umbrella! Rain probability is {weatherData.precipitationProbability}%</WarningAlert>
-								}{	((weatherData.condition.code >= 71 && weatherData.condition.code <= 77) || (weatherData.condition.code >= 85 && weatherData.condition.code <= 86)) &&
+										You should take an umbrella! Rain probability now is {weatherData.current.precipitationProbability}% but it will be {getMax(weatherData.hourly.precipitationProbability.slice(thisHour, 23)).val}% at {getMax(weatherData.hourly.precipitationProbability.slice(thisHour, 23)).i + thisHour}</WarningAlert>
+								}{	
+									(weatherData.hourly.condition.slice(thisHour, 23).some(item => (item.code >=71 && item.code <= 77) || (item.code >= 85 && item.code <= 86)))  &&
 									<WarningAlert>
 										<span className="icons">
 											<FontAwesomeIcon icon="fa-regular fa-snowflake" /> <FontAwesomeIcon icon="fa-solid fa-mitten" />
 										</span> 
-										Don't forget your hat and mittens, it's snowing!</WarningAlert>
+										Don't forget your hat and mittens, it's snowing today!</WarningAlert>
 								}{	(Math.round(weatherData.uvIndexMax) >= 4 && Math.round(weatherData.uvIndexMax) <= 6) &&
 									<WarningAlert>
 										<span className="icons">
@@ -92,13 +99,16 @@ function GenerationMain() {
 						)}
 
 					
-						{clothes.length === 0 ? (
-							<NoClothes>You haven't uploaded any clothing yet</NoClothes>
-						) : weatherData && clothes.length > 0 ? (
+						{(!clothes || !weatherData) ?
+						(
+							<Loader/>
+							
+						) :
+						 clothes.length > 0 ? (
 							<OutfitGeneration weatherData={weatherData} clothes={clothes} />
 						) : (
-							<p>Please wait, weather data is fetching...</p>
-						)}
+							<NoClothes>You haven't uploaded any clothing yet</NoClothes>
+						) }
 					
 				</section>
 			</div>
@@ -106,7 +116,7 @@ function GenerationMain() {
 	);
 }
 
-export default function Generation() {
+export default function Generate() {
 	
 	return (
 		<>
