@@ -618,26 +618,26 @@ export default function Trip() {
 				{packedClothes ?
 					temperatures &&
 					(!error ? (
-						<>
-							<h4 className="page-sub-title">
-								Average mid-day temperature will be{" "}
+						<div className="trip-weather-info">
+							<p>
+								Average mid-day temperature:{" "}
 								{temperatures.maxAverage.toFixed(1)} C°
-							</h4>
-                            <h4 className="page-sub-title">
-								The highest mid-day temperature will be{" "}
+							</p>
+                            <p>
+								The highest mid-day temperature:{" "}
 								{temperatures.max.toFixed(1)} C°
-							</h4>
-							<h4 className="page-sub-title">
-								Average evening temperature will be{" "}
+							</p>
+							<p>
+								Average evening temperature:{" "}
 								{temperatures.minAverage.toFixed(1)} C°
-							</h4>
-							<h4 className="page-sub-title">
-								The lowest evening temperature will be{" "}
+							</p>
+							<p>
+								The lowest evening temperature:{" "}
 								{temperatures.min.toFixed(1)} C°
-							</h4>
+							</p>
 							<h2>Clothes suggestions for your trip:</h2>
 							<OutfitFigure clothes={packedClothes} />
-						</>
+						</div>
 					) : (
 						<div className="outfits-container">
 							<p>Oops, something went wrong</p>

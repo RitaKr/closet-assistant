@@ -14,12 +14,13 @@ const clothing = process.env.PUBLIC_URL + "/images/clothing.jpg";
 const man = process.env.PUBLIC_URL + "/images/man.jpg";
 const winter = process.env.PUBLIC_URL + "/images/winter.jpg";
 const summer = process.env.PUBLIC_URL + "/images/summer.jpg";
-const calendar = process.env.PUBLIC_URL + "/images/calendar.jpg";
+const calendar = process.env.PUBLIC_URL + "/images/calendar.png";
 const womanCasual = process.env.PUBLIC_URL + "/images/woman-casual.jpg";
 const manBusiness = process.env.PUBLIC_URL + "/images/man-business.jpg";
 const jackets = process.env.PUBLIC_URL + "/images/jackets.jpg";
 const shelves = process.env.PUBLIC_URL + "/images/shelves.jpg";
 const tripPacker = process.env.PUBLIC_URL + "/images/trip-packer.png";
+const tripPacker2 = process.env.PUBLIC_URL + "/images/trip-packer2.png";
 
 function Page({ user }) {
 	return (
@@ -124,6 +125,27 @@ function Page({ user }) {
 				</div>
 			</section>
 
+			<section className="sixth-page main-section">
+				<div className="trip-packer text-container">
+					<h1>Prepare for a trip with Closet Assistant</h1>
+					<h2>Select the dates of your trip and get a personalised collection of clothes for it</h2>
+				</div>
+				<div className="images-container trip-packer-photo two-col-section">
+					<LazyLoadImage
+						alt="trip packer"
+						effect="blur"
+						className="trip-packer"
+						src={tripPacker}
+					/>
+					<LazyLoadImage
+						alt="trip packer generated clothes"
+						effect="blur"
+						className="trip-packer"
+						src={tripPacker2}
+					/>
+				</div>
+			</section>
+
 			<section className="fifth-page main-section one-col-section">
 				<div className="collection-creation">
 					<h1>Create collections and save your favorite outfits in 1 click</h1>
@@ -144,20 +166,7 @@ function Page({ user }) {
 				</div>
 			</section>
 
-			<section className="sixth-page main-section">
-				<div className="trip-packer text-container">
-					<h1>Prepare for a trip with Closet Assistant</h1>
-					<h2>Select the dates of your trip and get a personalised collection of clothes for it</h2>
-				</div>
-				<div className="images-container trip-packer-photo">
-					<LazyLoadImage
-						alt="trip packer"
-						effect="blur"
-						className="trip-packer"
-						src={tripPacker}
-					/>
-				</div>
-			</section>
+			
 
 			<section className="seventh-page main-section">
 				<div className="start-using">
@@ -166,7 +175,7 @@ function Page({ user }) {
 				</div>
 				{user ? (
 					<NavLink className="button" to="/generate">
-						Generate outfit
+						<FontAwesomeIcon icon="fa-solid fa-wand-magic-sparkles" className="icon"/> Generate outfit
 					</NavLink>
 				) : (
 					<NavLink className="button" to="/signup">

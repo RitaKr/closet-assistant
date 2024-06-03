@@ -358,7 +358,7 @@ h3 {
 	align-items: center;
 	&-no-padding {
 		padding: 0;
-		padding-bottom: calc(5vw + 100px);
+		padding-bottom: 100px;
 	}
 }
 .generate-outfit-container {
@@ -1609,7 +1609,7 @@ p.form-info, p.red {
 	padding: 5vw;
 	text-align: center;
 
-	&:nth-child(2n+1) {
+	&:nth-child(2n) {
 		background: $footer-bg-col;
 	}
 
@@ -1755,7 +1755,20 @@ p.form-info, p.red {
 }
 
 
+.trip-weather-info {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 5px;
 
+	p {
+		margin: 0;
+		font-size: 1.1rem;
+		color: $main-col-lighter;
+		font-weight: 300;
+	}
+	
+}
 
 
 
