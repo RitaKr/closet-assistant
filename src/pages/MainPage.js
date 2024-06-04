@@ -2,8 +2,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 import { useEffect, useState } from "react";
-import { updateUser } from "../utils/AuthManipulations";
-import { Link, NavLink } from "react-router-dom";
+import { updateUser } from "../utils/auth";
+import { NavLink } from "react-router-dom";
 import Nav from "../components/Nav";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
@@ -34,7 +34,11 @@ function Page({ user }) {
 					</h2>
 					{user ? (
 						<NavLink className="button" to="/generate">
-							<FontAwesomeIcon icon="fa-solid fa-wand-magic-sparkles" className="icon"/> Generate outfit
+							<FontAwesomeIcon
+								icon="fa-solid fa-wand-magic-sparkles"
+								className="icon"
+							/>{" "}
+							Generate outfit
 						</NavLink>
 					) : (
 						<div className="action-panel justify-content-start">
@@ -128,7 +132,10 @@ function Page({ user }) {
 			<section className="sixth-page main-section">
 				<div className="trip-packer text-container">
 					<h1>Prepare for a trip with Closet Assistant</h1>
-					<h2>Select the dates of your trip and get a personalised collection of clothes for it</h2>
+					<h2>
+						Select the dates of your trip and get a personalised collection of
+						clothes for it
+					</h2>
 				</div>
 				<div className="images-container trip-packer-photo two-col-section">
 					<LazyLoadImage
@@ -166,8 +173,6 @@ function Page({ user }) {
 				</div>
 			</section>
 
-			
-
 			<section className="seventh-page main-section">
 				<div className="start-using">
 					<h1>Closet assistant</h1>
@@ -175,7 +180,11 @@ function Page({ user }) {
 				</div>
 				{user ? (
 					<NavLink className="button" to="/generate">
-						<FontAwesomeIcon icon="fa-solid fa-wand-magic-sparkles" className="icon"/> Generate outfit
+						<FontAwesomeIcon
+							icon="fa-solid fa-wand-magic-sparkles"
+							className="icon"
+						/>{" "}
+						Generate outfit
 					</NavLink>
 				) : (
 					<NavLink className="button" to="/signup">

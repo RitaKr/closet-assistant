@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
-import { writeOutfit, getCollections } from "../utils/db";
+import { writeOutfit, getCollections } from "../assets/DBManipulations";
 import SuccessAlert from "../components/SuccessAlert";
 import ErrorAlert from "../components/ErrorAlert";
 import OutfitFigure from "../components/OutfitFigure";
@@ -9,24 +9,15 @@ import ColorsSelect from "./ColorsSelect";
 import WarningAlert from "./WarningAlert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Select from "./Select";
-import {
-	generateOutfit,
-	filterClothesForWeather,
-	thisHour,
-	hours,
-} from "../utils/WeatherApi";
+import { generateOutfit, filterClothesForWeather } from "../assets/WeatherApi";
 import DetailsForm from "./DetailsForm";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import Loader from "./Loader";
 library.add(fas);
 
 export default function OutfitGeneration({ clothes, weatherData }) {
 	const [outfitOptions, setOutfitOptions] = useState(null);
-	const [outfitOptions2, setOutfitOptions2] = useState(null);
 	const [outfit, setOutfit] = useState(null);
-	const [outfit2, setOutfit2] = useState(null);
-	const [hour, setHour] = useState(thisHour < 19 ? 19 : thisHour + 2);
 	const [error, setError] = useState(null);
 	const [color, setColor] = useState(null);
 	const [style, setStyle] = useState(null);
@@ -51,37 +42,23 @@ export default function OutfitGeneration({ clothes, weatherData }) {
 		setOutfitOptions(
 			filterClothesForWeather(
 				clothes,
-				weatherData.current.apparentTemperature,
+				weatherData.apparentTemperature,
 				color,
 				style,
 				includeWhite,
 				includeBlack
 			)
 		);
+		//updateMessages(outfitOptions);
 	}, [clothes, color, includeBlack, includeWhite, style]);
 
 	useEffect(() => {
-		setOutfitOptions2(
-			filterClothesForWeather(
-				clothes,
-				weatherData.hourly.apparentTemperature[hour],
-				color,
-				style,
-				includeWhite,
-				includeBlack
-			)
-		);
-	}, [hour, outfit]);
-
-	useEffect(() => {
+		//console.log("outfitOptions", outfitOptions);
 		if (outfitOptions) handleGeneration();
 	}, [outfitOptions]);
 
 	useEffect(() => {
-		if (outfitOptions2 && outfit) handleGeneration2();
-	}, [outfitOptions2, outfit]);
-
-	useEffect(() => {
+		//console.log("outfitOptions", outfitOptions);
 		updateMessages();
 	}, [outfit, includeBlack, includeWhite, style]);
 
@@ -97,20 +74,9 @@ export default function OutfitGeneration({ clothes, weatherData }) {
 			});
 	}
 
-	function handleGeneration2() {
-		generateOutfit(outfitOptions2, outfit)
-			.then((data) => {
-				setOutfit2(data);
-			})
-			.catch((e) => {
-				console.error(e);
-				setError(true);
-				setTimeout(() => setError(null), 5000);
-			});
-	}
-
 	function updateMessages() {
 		if (outfit) {
+			//console.log("outfit:",outfit);
 			const missingShoes = !outfit.some((item) => item.type === "Shoes");
 			const missingCoat =
 				(!outfit.some(
@@ -118,12 +84,12 @@ export default function OutfitGeneration({ clothes, weatherData }) {
 						item.type === "Coat/jacket" ||
 						item.type === "Hoodie/sweatshirt or sweater"
 				) &&
-					weatherData.current.apparentTemperature <= 18) ||
+					weatherData.apparentTemperature <= 18) ||
 				(!outfit.some((item) => item.type === "Coat/jacket") &&
-					weatherData.current.apparentTemperature <= 8);
+					weatherData.apparentTemperature <= 8);
 			const missingHoodie =
 				!outfit.some((item) => item.type === "Hoodie/sweatshirt or sweater") &&
-				weatherData.current.apparentTemperature <= 18;
+				weatherData.apparentTemperature <= 18;
 			const missingTshirt = !outfit.some(
 				(item) => item.type === "T-shirt/shirt"
 			);
@@ -133,7 +99,8 @@ export default function OutfitGeneration({ clothes, weatherData }) {
 			);
 			const missingUnderwear =
 				!outfit.some((item) => item.type === "Underwear") &&
-				weatherData.current.apparentTemperature <= 5;
+				weatherData.apparentTemperature <= 5;
+			//console.log("missingTshirt:",missingTshirt, ", missingPants:",missingPants, ", missingUnderwear:", missingUnderwear, ", missingShoes:",missingShoes, ", missingCoat:",missingCoat, ", missingHoodie:",missingHoodie);
 
 			setMessages({
 				"No t-shirt/shirt or dress found for the current weather. Consider uploading some":
@@ -149,18 +116,15 @@ export default function OutfitGeneration({ clothes, weatherData }) {
 				"No underwear found for the current weather. Consider uploading some":
 					missingUnderwear,
 			});
+
+			//console.log("messages", messages);
 		}
 	}
 
-	function addToCollection(e, o, h) {
+	function addToCollection(e) {
+		//console.log(e.target.dataset.collection, outfit);
 		try {
-			writeOutfit(
-				e.currentTarget.dataset.collection,
-				o,
-				weatherData.hourly.apparentTemperature[h].toFixed(1),
-				style,
-				color
-			);
+			writeOutfit(e.currentTarget.dataset.collection, outfit, weatherData.apparentTemperature.toFixed(1), style, color);
 			setError(false);
 			setTimeout(() => setError(null), 3000);
 		} catch (error) {
@@ -171,7 +135,7 @@ export default function OutfitGeneration({ clothes, weatherData }) {
 
 	return (
 		<>
-			{outfit && collections ? (
+			{outfit && collections && (
 				<div className="result-container">
 					<h1 className="page-title">Here's your outfit for today</h1>
 
@@ -242,13 +206,14 @@ export default function OutfitGeneration({ clothes, weatherData }) {
 												<li
 													className="add-to-collection-sub-btn"
 													data-collection={collection.id}
-													onClick={(e) => addToCollection(e, outfit, thisHour)}
+													onClick={addToCollection}
 													key={collection.id}
 												>
 													{collection.name === "Favorites" ? (
 														<span className="info">
 															{" "}
-															<FontAwesomeIcon icon="fa-solid fa-star" />{" "}
+															<FontAwesomeIcon icon="fa-solid fa-star" />
+															{" "}
 															{collection.name}
 														</span>
 													) : (
@@ -260,113 +225,36 @@ export default function OutfitGeneration({ clothes, weatherData }) {
 									</ul>
 								</button>
 							</div>
+							<div className="warning-messages-container">
+								{Object.entries(messages)
+									.filter(([m, incl]) => incl)
+									.map(([m, incl], i) => {
+										return (
+											<WarningAlert key={i}>
+												<span className="icons">
+													<FontAwesomeIcon icon="fa-solid fa-circle-exclamation" />
+												</span>
+												{m}
+											</WarningAlert>
+										);
+									})}
+							</div>
+							{error === false ? (
+								<SuccessAlert>Outfit added to collection</SuccessAlert>
+							) : error === true ? (
+								<ErrorAlert>
+									Error occurred while adding outfit to collection
+								</ErrorAlert>
+							) : (
+								""
+							)}
 						</>
 					) : (
 						<NoClothes>
 							No clothes matching current weather found. Consider uploading some
 						</NoClothes>
 					)}
-					{thisHour <= 21 && (
-						<>
-							<h2>
-								Later today (at{" "}
-								<select
-									name="hour"
-									id="hour"
-									value={hour}
-									onChange={(e) => setHour(e.target.value)}
-									className="form-input text-lighter"
-								>
-									{hours.map((h, i) => (
-										<option key={i} value={h}>
-											{h % 24}
-										</option>
-									))}
-								</select>
-								) you would wear:
-							</h2>
-							{outfit2 ? (
-								outfit2.length > 0 ? (
-									<>
-										<OutfitFigure clothes={outfit2} />
-										<div className="action-panel">
-											<button
-												className="button"
-												onClick={handleGeneration2}
-												title="Regenerate"
-											>
-												<FontAwesomeIcon icon={["fas", "rotate-right"]} />
-											</button>
-											<button
-												className="button add-to-collection-btn"
-												disabled={!outfit}
-											>
-												<span>Add to collection</span>
-												<ul className="sub-menu">
-													{collections.map((collection) => {
-														return (
-															<li
-																className="add-to-collection-sub-btn"
-																data-collection={collection.id}
-																onClick={(e) =>
-																	addToCollection(e, outfit2, hour)
-																}
-																key={collection.id}
-															>
-																{collection.name === "Favorites" ? (
-																	<span className="info">
-																		{" "}
-																		<FontAwesomeIcon icon="fa-solid fa-star" />{" "}
-																		{collection.name}
-																	</span>
-																) : (
-																	collection.name
-																)}
-															</li>
-														);
-													})}
-												</ul>
-											</button>
-										</div>
-									</>
-								) : (
-									<NoClothes>
-										No clothes matching weather at {hour} found. Consider
-										uploading some
-									</NoClothes>
-								)
-							) : (
-								<Loader />
-							)}
-						</>
-					)}
-
-					<div className="warning-messages-container">
-						{Object.entries(messages)
-							.filter(([m, incl]) => incl)
-							.map(([m, incl], i) => {
-								return (
-									<WarningAlert key={i}>
-										<span className="icons">
-											<FontAwesomeIcon icon="fa-solid fa-circle-exclamation" />
-										</span>
-										{m}
-									</WarningAlert>
-								);
-							})}
-					</div>
-					{error === false ? (
-						<SuccessAlert>Outfit added to collection</SuccessAlert>
-					) : error === true ? (
-						<ErrorAlert>
-							Error occurred while adding outfit to collection
-						</ErrorAlert>
-					) : (
-						""
-					)}
 				</div>
-			) : (
-				<Loader />
 			)}
 		</>
 	);

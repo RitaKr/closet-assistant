@@ -2,20 +2,15 @@ import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
-import { getClothes } from "../utils/DBManipulations";
+import { getClothes } from "../utils/db";
 import "firebase/database";
 
-//import { weatherApiKey } from "../weatherApiKey";
 import {
 	fetchForecastData,
 	filterClothesForWeather,
 	generateOutfit,
 } from "../utils/WeatherApi";
-import { auth, updateUser } from "../utils/AuthManipulations";
-import OutfitGeneration from "../components/OutfitGeneration";
-import NoClothes from "../components/NoClothes";
-import WarningAlert from "../components/WarningAlert";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { updateUser } from "../utils/auth";
 import OutfitFigure from "../components/OutfitFigure";
 import Loader from "../components/Loader";
 import { formatDate } from "../utils/utils";
@@ -26,15 +21,13 @@ export default function Calendar() {
 	const [outfitOptions, setOutfitOptions] = useState(null);
 	const [weatherData, setWeatherData] = useState(null);
 	const [user, setUser] = useState(null);
-    const [error, setError] = useState(null);
-
+	const [error, setError] = useState(null);
 
 	useEffect(() => {
 		updateUser(setUser);
 	}, []);
 
 	useEffect(() => {
-		//console.log(auth);
 		if (user) {
 			getClothes().then((data) => {
 				setClothes(data);
@@ -47,60 +40,55 @@ export default function Calendar() {
 	}, []);
 
 	function getTemp(day) {
-		if (weatherData){
+		if (weatherData) {
 			return {
-				evening: weatherData.hourly.apparentTemperature[day*24 + 21],
-				morning: weatherData.hourly.apparentTemperature[day*24 + 8]
-			}
+				evening: weatherData.hourly.apparentTemperature[day * 24 + 21],
+				morning: weatherData.hourly.apparentTemperature[day * 24 + 8],
+			};
 		} else {
-			console.error("no weather data")
+			console.error("no weather data");
 		}
 	}
 	useEffect(() => {
-		
-		if (weatherData && weatherData.daily){
-		//console.log(weatherData.hourly)
+		if (weatherData && weatherData.daily) {
 			setOutfitOptions(
 				weatherData.daily.map((forecast, i) => ({
-					evening: filterClothesForWeather(
-						clothes,
-						getTemp(i).evening
-					),
-					morning: filterClothesForWeather(
-						clothes,
-						getTemp(i).morning
-					),
+					evening: filterClothesForWeather(clothes, getTemp(i).evening),
+					morning: filterClothesForWeather(clothes, getTemp(i).morning),
 					day: filterClothesForWeather(
 						clothes,
 						forecast.apparentTemperatureMax
 					),
 				}))
 			);
-}
-			//console.log("outfitOptions", outfitOptions);
+		}
 	}, [clothes, weatherData]);
 
 	useEffect(() => {
-		//console.log("outfitOptions", outfitOptions);
 		if (outfitOptions) handleGeneration();
 	}, [outfitOptions]);
 
 	async function handleGeneration() {
 		try {
-
 			const newOutfits = await Promise.all(
 				outfitOptions.map(async (option) => {
 					const dayOutfit = await generateOutfit(option.day);
 					const morningOutfit = await generateOutfit(option.morning, dayOutfit);
-					const eveningOutfit = await generateOutfit(option.evening, morningOutfit);
-					return { morning: morningOutfit, day: dayOutfit , evening: eveningOutfit};
+					const eveningOutfit = await generateOutfit(
+						option.evening,
+						morningOutfit
+					);
+					return {
+						morning: morningOutfit,
+						day: dayOutfit,
+						evening: eveningOutfit,
+					};
 				})
 			);
-			//console.log(newOutfits);
 			setOutfits(newOutfits);
 		} catch (e) {
 			console.error(e);
-            setError(e)
+			setError(e);
 		}
 	}
 
@@ -123,12 +111,8 @@ export default function Calendar() {
 											<h3>{formatDate(date)}</h3>
 										</header>
 										<div className="outfits">
-										<div className="outfit-type">
-												<h4>
-													Morning:{" "}
-													{getTemp(i).morning.toFixed(1)}{" "}
-													C°
-												</h4>
+											<div className="outfit-type">
+												<h4>Morning: {getTemp(i).morning.toFixed(1)} C°</h4>
 												<OutfitFigure
 													clothes={outfit.morning}
 													id={`outfit-${date}`}
@@ -138,9 +122,9 @@ export default function Calendar() {
 											<div className="outfit-type">
 												<h4>
 													Day:{" "}
-													{weatherData.daily[
-														i
-													].apparentTemperatureMax.toFixed(1)}{" "}
+													{weatherData.daily[i].apparentTemperatureMax.toFixed(
+														1
+													)}{" "}
 													C°
 												</h4>
 												<OutfitFigure
@@ -150,11 +134,7 @@ export default function Calendar() {
 												/>
 											</div>
 											<div className="outfit-type">
-												<h4>
-													Evening:{" "}
-													{getTemp(i).evening.toFixed(1)}{" "}
-													C°
-												</h4>
+												<h4>Evening: {getTemp(i).evening.toFixed(1)} C°</h4>
 												<OutfitFigure
 													clothes={outfit.evening}
 													id={`outfit-${date}`}

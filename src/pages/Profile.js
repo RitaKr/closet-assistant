@@ -6,23 +6,16 @@ import {
 	signOut,
 	auth,
 	deleteAccount,
-    getUserInfo,
-} from "../utils/AuthManipulations";
+} from "../utils/auth";
 import Loader from "../components/Loader";
 import ErrorAlert from "../components/ErrorAlert";
 import { useNavigate } from "react-router-dom";
 import { updateProfile } from "firebase/auth";
-import {
-	ApplyButton,
-	CancelButton,
-	DeleteButton,
-	EditButton,
-} from "../components/Buttons";
+import { ApplyButton, CancelButton, EditButton } from "../components/Buttons";
 
 export default function Profile() {
 	const [user, setUser] = useState(null);
 	const [error, setError] = useState(null);
-	const navigate = useNavigate();
 	const [name, setName] = useState(null);
 	const [editing, setEditing] = useState(false);
 	const nameInput = useRef(null);
@@ -32,9 +25,8 @@ export default function Profile() {
 	}, []);
 
 	useEffect(() => {
-		//console.log(auth);
 		if (user) {
-            setName(user.displayName);
+			setName(user.displayName);
 		}
 	}, [user]);
 
@@ -47,12 +39,10 @@ export default function Profile() {
 		e.preventDefault();
 		if (name && name.trim() !== "") {
 			try {
-                //user.displayName = name;
-				updateProfile(user, { displayName: name }).then(()=>{
-                    updateUser(setUser);
-                    setEditing(false);
-                });
-                
+				updateProfile(user, { displayName: name }).then(() => {
+					updateUser(setUser);
+					setEditing(false);
+				});
 			} catch (error) {
 				console.error("Error creating collection", error);
 				setError(error);
@@ -75,7 +65,12 @@ export default function Profile() {
 					<h1 className="page-title">Your account</h1>
 					<div className="profile-container">
 						<div className="profile-details">
-                        <p>Date of registration: <span className="profile-value">{user.metadata.creationTime}</span></p>
+							<p>
+								Date of registration:{" "}
+								<span className="profile-value">
+									{user.metadata.creationTime}
+								</span>
+							</p>
 							<h3 className="editable-title">
 								<span>Username:</span>
 								{editing ? (
@@ -103,8 +98,9 @@ export default function Profile() {
 									</div>
 								)}
 							</h3>
-							<h3>Email: <span className="profile-value">{user.email}</span></h3>
-                            
+							<h3>
+								Email: <span className="profile-value">{user.email}</span>
+							</h3>
 						</div>
 						<div className="profile-details action-panel">
 							<button

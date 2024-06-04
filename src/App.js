@@ -9,11 +9,11 @@ import MainPage from './pages/MainPage';
 
 import Collections from './pages/Collections';
 
-import { getCollections, database } from './utils/DBManipulations';
+import { getCollections, database } from './utils/db';
 import Calendar from './pages/Calendar';
 import Collection from "./pages/Collection";
 import Loader from "./components/Loader";
-import { updateUser } from "./utils/AuthManipulations";
+import { updateUser } from "./utils/auth";
 import { onChildChanged, onChildRemoved, onChildAdded, ref } from "firebase/database";
 import Profile from "./pages/Profile";
 import Trip from "./pages/Trip";

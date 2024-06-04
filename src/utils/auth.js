@@ -9,9 +9,9 @@ import {
 	deleteUser,
 } from "firebase/auth";
 import { app } from "../config";
-import { removeAllUserData, removeCollection } from "./DBManipulations";
-import { deleteAllUserImagesFromStorage } from "./StorageManipulations";
-import { set } from "firebase/database";
+import { removeAllUserData } from "./db";
+import { deleteAllUserImagesFromStorage } from "./storage";
+
 // Initialize Firebase
 
 // Initialize Firebase Authentication and get a reference to the service
@@ -30,9 +30,7 @@ export function signUp(email, password, displayName, setError) {
 				signIn(email, password, setError);
 			})
 			.catch((error) => {
-				//console.error(error)
 				if (setError) setError(error);
-				// ..
 			});
 	} catch (error) {
 		setError(error);
@@ -47,9 +45,7 @@ export function signIn(email, password, setError) {
 				const displayName = user.displayName
 					? user.displayName
 					: createUsername();
-          updateProfile(user, { displayName: displayName });
-				//navigate('/home');
-				// ...
+				updateProfile(user, { displayName: displayName });
 			})
 			.catch((error) => {
 				//console.error(error);
@@ -61,21 +57,15 @@ export function signIn(email, password, setError) {
 }
 onAuthStateChanged(auth, (user) => {
 	if (user) {
-		// User is signed in, see docs for a list of available properties
-		// https://firebase.google.com/docs/reference/js/auth.user
 		uid = user.uid;
 	}
 });
 
 export function signOut() {
-	signOutFromFirebase(auth)
-		.then(() => {
-			// Sign-out successful.
-		})
-		.catch((error) => {
-			// An error happened.
-			console.error("error while signing out: ", error);
-		});
+	signOutFromFirebase(auth).catch((error) => {
+		// An error happened.
+		console.error("error while signing out: ", error);
+	});
 }
 
 export function updateUser(setUser) {
@@ -94,10 +84,10 @@ export function createUsername() {
 export function resetPassword(email, setError, setMessage) {
 	sendPasswordResetEmail(auth, email)
 		.then(() => {
-			// Password reset email sent!
-			// ..
-		//console.log("Password reset email sent");
-		setMessage({type: "success", text: "Password reset link was sent to your email"});
+			setMessage({
+				type: "success",
+				text: "Password reset link was sent to your email",
+			});
 		})
 		.catch((error) => {
 			console.error(error);
@@ -115,31 +105,13 @@ export function deleteAccount(setError) {
 		removeAllUserData(user.uid);
 		deleteAllUserImagesFromStorage(user.uid)
 			.then(() => {
-			//console.log("images deleted successfully");
-				deleteUser(user)
-					.then(() => {
-					//console.log("User deleted");
-
-						//signOut(auth);
-					})
-					.catch((error) => {
-						console.error("Error deleting user: ", error);
-						setError(error);
-					});
+				deleteUser(user).catch((error) => {
+					console.error("Error deleting user: ", error);
+					setError(error);
+				});
 			})
 			.catch((error) => {
 				console.error("error while deleting images: ", error);
 			});
 	}
-}
-
-export function getUserInfo() {
-  const user = auth.currentUser;
-  if (user) {
-   //console.log(`user:`, user);
-   //console.log(`Creation time: ${user.metadata.creationTime}`);
-    // More fields...
-  } else {
-   //console.log('No user is signed in.');
-  }
 }

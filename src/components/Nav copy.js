@@ -2,9 +2,9 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { app } from "../config";
 import { useState, useEffect } from "react";
-
+import { createUsername, getDisplayName, updateUser } from "../assets/AuthManipulations";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { updateUser,  getDisplayName} from "../utils/auth";
+// Initialize Firebase
 
 const auth = getAuth(app);
 
@@ -19,13 +19,15 @@ export default function Nav({ searchRef }) {
 
 	onAuthStateChanged(auth, (user) => {
 		if (!user) {
-			navigate("/");
+			navigate("/login");
 		}
 	});
 	function handleSearchOpen(e) {
+		//console.log(e.target, searchRef.current, searchOpen);
 		searchRef.current.hidden = searchOpen;
 
 		setSearchOpen(!searchOpen);
+		//console.log("after:", e.target, searchRef.current, searchOpen);
 	}
 	return (
 		<nav className="page-nav navbar navbar-expand-md">
@@ -42,18 +44,14 @@ export default function Nav({ searchRef }) {
 					<span className="navbar-toggler-icon"></span>
 				</button>
 				{user && (
-					<NavLink
-						to="/profile"
-						className={({ isActive }) =>
-							(isActive ? "active" : "") + " profile"
-						}
-					>
-						<FontAwesomeIcon
-							icon="fa-solid fa-user-large"
-							className="user-icon"
-						/>
-						<span className="profile-info">{getDisplayName()}</span>
-					</NavLink>
+						<NavLink
+							to="/profile"
+							className={({ isActive }) => (isActive ? "active" : "")+ " profile"}
+						>
+							<FontAwesomeIcon icon="fa-solid fa-user-large" className="user-icon" />
+							<span className="profile-info">{getDisplayName()}</span>
+						</NavLink>
+		
 				)}
 				<div className="collapse navbar-collapse" id="navbarToggler">
 					<ul className="navbar-nav me-auto mb-2 mb-md-0">
@@ -76,14 +74,6 @@ export default function Nav({ searchRef }) {
 						</li>
 						<li>
 							<NavLink
-								to="/generate"
-								className={({ isActive }) => (isActive ? "active" : "")}
-							>
-								Generate
-							</NavLink>
-						</li>
-						<li>
-							<NavLink
 								to="/collections"
 								className={({ isActive }) => (isActive ? "active" : "")}
 							>
@@ -96,14 +86,6 @@ export default function Nav({ searchRef }) {
 								className={({ isActive }) => (isActive ? "active" : "")}
 							>
 								Outfits calendar
-							</NavLink>
-						</li>
-						<li>
-							<NavLink
-								to="/trip-packer"
-								className={({ isActive }) => (isActive ? "active" : "")}
-							>
-								Trip packer
 							</NavLink>
 						</li>
 					</ul>

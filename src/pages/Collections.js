@@ -2,12 +2,11 @@ import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
 import {
-	getOutfits,
 	database,
 	getCollections,
 	writeCollection,
-} from "../utils/DBManipulations";
-import { updateUser } from "../utils/AuthManipulations";
+} from "../utils/db";
+import { updateUser } from "../utils/auth";
 import {
 	onChildAdded,
 	onChildChanged,
@@ -41,27 +40,21 @@ export default function Collections() {
 
 	useEffect(() => {
 		if (user) {
-			//setUser(auth.currentUser);
-			//getClothes(setClothes);
 			getCollections().then((data) => {
-				//console.log(data);
 				setCollections(data);
 			});
 			onChildRemoved(ref(database, `collections/${user.uid}/`), (data) => {
 				getCollections().then((data) => {
-					//console.log("outfits fetched", data);
 					setCollections(data);
 				});
 			});
 			onChildChanged(ref(database, `collections/${user.uid}/`), (data) => {
 				getCollections().then((data) => {
-					//console.log("outfits fetched", data);
 					setCollections(data);
 				});
 			});
 			onChildAdded(ref(database, `collections/${user.uid}/`), (data) => {
 				getCollections().then((data) => {
-					//console.log("outfits fetched", data);
 					setCollections(data);
 				});
 			});

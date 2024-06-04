@@ -8,7 +8,12 @@ export const hours = Array.from(
 	(_, i) => 1 + thisHour + i
 );
 
-async function fetchForecastData(setWeatherData, coordinates, start_date, end_date) {
+async function fetchForecastData(
+	setWeatherData,
+	coordinates,
+	start_date,
+	end_date
+) {
 	const params = {
 		latitude: coordinates ? coordinates.lat : 50.4547,
 		longitude: coordinates ? coordinates.lng : 30.5238,
@@ -25,16 +30,13 @@ async function fetchForecastData(setWeatherData, coordinates, start_date, end_da
 			"apparent_temperature_max",
 			"apparent_temperature_min",
 		],
-        
-		
 	};
-    if (start_date && end_date) {
-        params.start_date = start_date;
-        params.end_date = end_date;
-    
-    } else {
-        params.forecast_days = 14;
-    }
+	if (start_date && end_date) {
+		params.start_date = start_date;
+		params.end_date = end_date;
+	} else {
+		params.forecast_days = 14;
+	}
 
 	if (!coordinates) {
 		await navigator.geolocation.getCurrentPosition((position) => {
@@ -48,7 +50,6 @@ async function fetchForecastData(setWeatherData, coordinates, start_date, end_da
 
 	// Process first location. Add a for-loop for multiple locations or weather models
 	const response = responses[0];
-	//console.log("weather response: ",response);
 
 	const hourly = response.hourly();
 	const daily = response.daily();
@@ -59,7 +60,6 @@ async function fetchForecastData(setWeatherData, coordinates, start_date, end_da
 			precipitationProbability: Array.from(hourly.variables(1).valuesArray()),
 			precipitation: Array.from(hourly.variables(2).valuesArray()),
 			snowfall: Array.from(hourly.variables(3).valuesArray()),
-			//weatherCode: Array.from(hourly.variables(4).valuesArray()).slice(0, 24),
 			windSpeed10m: Array.from(hourly.variables(5).valuesArray()),
 			condition: Array.from(hourly.variables(4).valuesArray()).map((c) => {
 				return { code: c, text: weatherConditions[c] };
@@ -74,7 +74,6 @@ async function fetchForecastData(setWeatherData, coordinates, start_date, end_da
 			],
 			precipitation: Array.from(hourly.variables(2).valuesArray())[thisHour],
 			snowfall: Array.from(hourly.variables(3).valuesArray())[thisHour],
-			//weatherCode: Array.from(hourly.variables(4).valuesArray())[thisHour],
 			windSpeed10m: Array.from(hourly.variables(5).valuesArray())[thisHour],
 			condition: {
 				code: Array.from(hourly.variables(4).valuesArray())[thisHour],
@@ -100,40 +99,11 @@ async function fetchForecastData(setWeatherData, coordinates, start_date, end_da
 		apparentTemperatureMin: Array.from(daily.variables(2).valuesArray())[0],
 		uvIndexMax: Array.from(daily.variables(0).valuesArray())[0],
 	};
-	//console.log("weatherData.daily: ",weatherData.daily);
-
-	//console.log(thisHour)
-
-	//     const thisHourForecast = {
-	//         apparentTemperature: weatherData.hourly.apparentTemperature[thisHour],
-	//         precipitationProbability:
-	//             weatherData.hourly.precipitationProbability[thisHour],
-	//         precipitation: weatherData.hourly.precipitation[thisHour],
-	//         snowfall: weatherData.hourly.snowfall[thisHour],
-	//         condition: {
-	//             code: weatherData.hourly.weatherCode[thisHour],
-	//             text: weatherConditions[weatherData.hourly.weatherCode[thisHour]],
-	//         },
-
-	//         windSpeed10m: weatherData.hourly.windSpeed10m[thisHour],
-	//         apparentTemperatureMax: weatherData.daily.apparent_temperature_max[0],
-	//         apparentTemperatureMin: weatherData.daily.apparent_temperature_min[0],
-	//         uvIndexMax: weatherData.daily.uv_index_max[0],
-	//         forecast: weatherData.daily.apparent_temperature_max.map((item, i) => {
-	//             return {
-	//                 "apparentTemperatureMax": weatherData.daily.apparent_temperature_max[i],
-	//                 "apparentTemperatureMin": weatherData.daily.apparent_temperature_min[i],
-	//                 "uvIndexMax": weatherData.daily.uv_index_max[i],
-	//             }
-	// })
-	//     };
 
 	setWeatherData(weatherData);
-	//console.log("weather forecast: ",thisHourForecast.forecast);
 }
 
 export function parseTempRange(rangeStr) {
-	//console.log(rangeStr)
 	let range = rangeStr.split(" to ").map((t) => parseInt(t.trim()));
 	if (range.length < 2) {
 		if (rangeStr.indexOf("less than") >= 0) {
@@ -142,12 +112,9 @@ export function parseTempRange(rangeStr) {
 			range = [parseInt(rangeStr.split(" ")[2].trim()), 100];
 		}
 	}
-	//console.log(range);
 	return range;
 }
 function fitsIntoRange(rangesArr, temp) {
-	//console.log(rangesArr, temp);
-
 	return (
 		rangesArr.filter((range) => temp >= range[0] && temp <= range[1]).length > 0
 	);
@@ -161,7 +128,6 @@ function filterClothesForWeather(
 	includeWhite,
 	includeBlack
 ) {
-	//console.log("clothes:", clothes);
 	const filteredClothes = {
 		headwear: [],
 		accessory: [],
@@ -246,11 +212,9 @@ function filterClothesForWeather(
 			fitsIntoRange(tempRanges, temperature)
 		);
 	});
-	//console.log("matches for the weather: ", filteredClothes);
 
 	//color themed generation
 	if (color) {
-		//console.log("color:", color);
 		for (const key in filteredClothes) {
 			filteredClothes[key] = filteredClothes[key].filter((cl) => {
 				return (
@@ -263,17 +227,13 @@ function filterClothesForWeather(
 	}
 
 	if (style) {
-		//console.log("style:", style);
 		for (const key in filteredClothes) {
 			filteredClothes[key] = filteredClothes[key].filter((cl) => {
 				return Array.isArray(cl.styles) && cl.styles.includes(style);
 			});
 		}
 	}
-	//console.log("matches for the color: ", filteredClothes);
 	return filteredClothes;
-
-	//console.log("setOutfitOptions: ", outfitOptions)
 }
 
 function randomItem(arr) {
@@ -281,11 +241,7 @@ function randomItem(arr) {
 	return arr[i];
 }
 async function generateOutfit(outfitOptions, baseOutfit) {
-	//console.log(outfitOptions);
-
 	if (typeof baseOutfit !== "undefined" && baseOutfit !== null) {
-		//console.log("in generateOutfit: ", outfitOptions, baseOutfit)
-		//const keys = Object.keys(outfitOptions);
 		const newOutfit = baseOutfit.filter((clothing) =>
 			Object.values(outfitOptions).some((options) => options.includes(clothing))
 		);
@@ -301,9 +257,7 @@ async function generateOutfit(outfitOptions, baseOutfit) {
 		);
 		return await Object.values(updatedOutfitOptions).reduce(
 			(acc, optionsArr, i) => {
-				//console.log(acc, optionsArr);
 				let random = randomItem(optionsArr);
-				//console.log("random:", random);
 				if (typeof random !== "undefined") {
 					while (acc.includes(random) && outfitOptions.length > 1)
 						random = randomItem(optionsArr);
@@ -314,10 +268,8 @@ async function generateOutfit(outfitOptions, baseOutfit) {
 			[...newOutfit]
 		);
 	} else {
-		return await Object.values(outfitOptions).reduce((acc, optionsArr, i) => {
-			//console.log(acc, optionsArr);
+		return await Object.values(outfitOptions).reduce((acc, optionsArr) => {
 			let random = randomItem(optionsArr);
-			//console.log("random:", random);
 			if (typeof random !== "undefined") {
 				while (acc.includes(random) && outfitOptions.length > 1)
 					random = randomItem(optionsArr);
@@ -328,4 +280,9 @@ async function generateOutfit(outfitOptions, baseOutfit) {
 	}
 }
 
-export { fetchForecastData, generateOutfit, filterClothesForWeather, randomItem };
+export {
+	fetchForecastData,
+	generateOutfit,
+	filterClothesForWeather,
+	randomItem,
+};

@@ -1,25 +1,16 @@
 import { useState, useEffect } from "react";
-import Header from "../components/Header";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
-import { getClothes } from "../utils/DBManipulations";
+import { getClothes } from "../utils/db";
 import "firebase/database";
 
-//import { weatherApiKey } from "../weatherApiKey";
 import {
 	fetchForecastData,
 	filterClothesForWeather,
-	generateOutfit,
 	randomItem,
 } from "../utils/WeatherApi";
-import { auth, updateUser } from "../utils/AuthManipulations";
-import OutfitGeneration from "../components/OutfitGeneration";
-import NoClothes from "../components/NoClothes";
-import WarningAlert from "../components/WarningAlert";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { updateUser } from "../utils/auth";
 import OutfitFigure from "../components/OutfitFigure";
-import Loader from "../components/Loader";
-import { formatDate } from "../utils/utils";
 import Required from "../components/Required";
 import {
 	MapContainer,
@@ -178,12 +169,7 @@ export default function Trip() {
 	function handleSubmit(e) {
 		e.preventDefault();
 		fetchForecastData(setWeatherData, form.location, form.start, form.end);
-		//console.log("form submitted:", form);
 	}
-
-	useEffect(() => {
-		//console.log("form data:", form)
-	}, [form]);
 
 	function getTemp(day) {
 		if (weatherData) {
@@ -216,20 +202,6 @@ export default function Trip() {
 				minAverage: minTempsAverage,
 				maxAverage: maxTempsAverage,
 			});
-			//console.log("max temp:", maxTemp, "min temp:", minTemp);
-
-			// let options = filterClothesForWeather(clothes, maxTemp - 1);
-			// for (let i = parseInt(minTemp + 1); i < parseInt(maxTemp); i++) {
-			// 	//console.log("options for temp " + i + ": ",filterClothesForWeather(clothes, i));
-			// 	const currentOption = filterClothesForWeather(clothes, i);
-			// 	Object.keys(options).forEach((key) => {
-			// 		if (currentOption[key]) {
-			// 			options[key] = Array.from(
-			// 				new Set(options[key].concat(currentOption[key]))
-			// 			);
-			// 		}
-			// 	});
-			// }
 
 			let options = filterClothesForWeather(clothes, minTempsAverage);
 			let maxTempAverageOptions = filterClothesForWeather(
@@ -343,7 +315,6 @@ export default function Trip() {
 				options.every((o) => packed.includes(o)))
 		) {
 			capacityCopy.lower--;
-			//capacityCopy.other++;
 			return true;
 		}
 		if (
@@ -352,7 +323,6 @@ export default function Trip() {
 				options.every((o) => packed.includes(o)))
 		) {
 			capacityCopy.upper1--;
-			//capacityCopy.other++;
 			return true;
 		}
 		if (
@@ -363,7 +333,6 @@ export default function Trip() {
 					outfitOptions.middle["upper3"].every((o) => packed.includes(o))))
 		) {
 			capacityCopy.upper2--;
-			//capacityCopy.other++;
 			return true;
 		}
 
@@ -373,47 +342,37 @@ export default function Trip() {
 				options.every((o) => packed.includes(o)))
 		) {
 			capacityCopy.shoes--;
-			//capacityCopy.other++;
 			return true;
 		}
 	}
 
 	function chooseClothes() {
 		if (outfitOptions) {
-			//console.log("packing! outfitOptions", outfitOptions);
 			const packed = [];
 			const capacityCopy = { ...form.luggage.capacity };
 			Object.keys(outfitOptions.max).forEach((type) => {
 				let cl = randomItem(outfitOptions.max[type]);
 				while (cl && packed.includes(cl)) {
 					cl = randomItem(outfitOptions.max[type]);
-					//console.log(cl, outfitOptions.max[type]);
 
-					// Check if all items from options are already in packed
 					let allItemsPacked = outfitOptions.max[type].every((opt) =>
 						packed.includes(opt)
 					);
 					if (allItemsPacked) {
-						//console.log("All items are already packed.");
 						break;
 					}
 				}
-				//console.log("trying ", cl, " from ", outfitOptions.max[type]);
-				//console.log("add?  ", cl, !packedClothes.includes(cl), capacityLeft( capacityCopy, type));
+
 				if (cl && !packed.includes(cl) && capacityLeft(capacityCopy, type)) {
 					packed.push(cl);
 					capacityDecrease(capacityCopy, type);
-					// Remove item from outfitOptions.min
 					outfitOptions.min[type] = outfitOptions.min[type].filter(
 						(item) => item.id !== cl.id
 					);
 
-					// Remove item from outfitOptions.middle
 					outfitOptions.middle[type] = outfitOptions.middle[type].filter(
 						(item) => item.id !== cl.id
 					);
-
-					//console.log("added ", cl, "capacity:", capacityCopy);
 				}
 			});
 			Object.keys(outfitOptions.min).forEach((type) => {
@@ -421,14 +380,10 @@ export default function Trip() {
 
 				while (cl && packed.includes(cl)) {
 					cl = randomItem(outfitOptions.min[type]);
-					//console.log(cl, outfitOptions.min[type]);
-
-					// Check if all items from options are already in packed
 					let allItemsPacked = outfitOptions.min[type].every((opt) =>
 						packed.includes(opt)
 					);
 					if (allItemsPacked) {
-						//console.log("All items are already packed.");
 						break;
 					}
 				}
@@ -438,15 +393,8 @@ export default function Trip() {
 					outfitOptions.middle[type] = outfitOptions.middle[type].filter(
 						(item) => item.id !== cl.id
 					);
-					//console.log("added ", cl, "capacity:", capacityCopy);
 				}
 			});
-			//console.log(
-			// 	"capacity before last round:",
-			// 	capacityCopy,
-			// 	"already packed:",
-			// 	packed
-			// );
 
 			while (
 				capacityLeft(capacityCopy) &&
@@ -454,11 +402,6 @@ export default function Trip() {
 					(clo) => clo.length > 0 && clo.some((c) => !packed.includes(c))
 				)
 			) {
-				//console.log(
-				// 	"Capacity left:",
-				// 	Object.values(capacityCopy),
-				// 	Object.values(capacityCopy).reduce((acc, cap) => acc + cap, 0)
-				// ); // Debugging statement
 				if (Object.values(capacityCopy).reduce((acc, cap) => acc + cap, 0) <= 0)
 					break;
 				Object.keys(outfitOptions.middle)
@@ -467,20 +410,13 @@ export default function Trip() {
 							outfitOptions.middle[a].length - outfitOptions.middle[b].length
 					)
 					.forEach((type) => {
-						//console.log("Type:", type, "options:", outfitOptions.middle[type]); // Debugging statement
 						if (
 							!outfitOptions.middle[type].every((opt) => packed.includes(opt))
 						) {
 							let cl = randomItem(outfitOptions.middle[type]);
-							//console.log("generated ", cl.name, "capacity:", capacityCopy);
+
 							while (cl && packed.includes(cl)) {
 								cl = randomItem(outfitOptions.middle[type]);
-								//console.log(
-								// 	"re-generated ",
-								// 	cl.name,
-								// 	"capacity:",
-								// 	capacityCopy
-								// );
 							}
 
 							if (
@@ -493,14 +429,11 @@ export default function Trip() {
 								outfitOptions.middle[type] = outfitOptions.middle[type].filter(
 									(item) => item.id !== cl.id
 								);
-								//console.log("added ", cl.name, "capacity:", capacityCopy);
 							}
 						}
 						balance(capacityCopy, outfitOptions.middle[type], type, packed);
-						//console.log("capacity after balance:", capacityCopy);
 					});
 			}
-			//console.log("capacity in the end:", capacityCopy, form.luggage.capacity);
 			setPackedClothes(packed.sort((a, b) => a.type.localeCompare(b.type)));
 		}
 	}
@@ -615,40 +548,40 @@ export default function Trip() {
 				</form>
 
 				<div className="wrapper">
-				{packedClothes ?
-					temperatures &&
-					(!error ? (
-						<div className="trip-weather-info">
-							<p>
-								Average mid-day temperature:{" "}
-								{temperatures.maxAverage.toFixed(1)} C°
-							</p>
-                            <p>
-								The highest mid-day temperature:{" "}
-								{temperatures.max.toFixed(1)} C°
-							</p>
-							<p>
-								Average evening temperature:{" "}
-								{temperatures.minAverage.toFixed(1)} C°
-							</p>
-							<p>
-								The lowest evening temperature:{" "}
-								{temperatures.min.toFixed(1)} C°
-							</p>
-							<h2>Clothes suggestions for your trip:</h2>
-							<OutfitFigure clothes={packedClothes} />
-						</div>
+					{packedClothes ? (
+						temperatures &&
+						(!error ? (
+							<div className="trip-weather-info">
+								<p>
+									Average mid-day temperature:{" "}
+									{temperatures.maxAverage.toFixed(1)} C°
+								</p>
+								<p>
+									The highest mid-day temperature: {temperatures.max.toFixed(1)}{" "}
+									C°
+								</p>
+								<p>
+									Average evening temperature:{" "}
+									{temperatures.minAverage.toFixed(1)} C°
+								</p>
+								<p>
+									The lowest evening temperature: {temperatures.min.toFixed(1)}{" "}
+									C°
+								</p>
+								<h2>Clothes suggestions for your trip:</h2>
+								<OutfitFigure clothes={packedClothes} />
+							</div>
+						) : (
+							<div className="outfits-container">
+								<p>Oops, something went wrong</p>
+							</div>
+						))
 					) : (
 						<div className="outfits-container">
-							<p>Oops, something went wrong</p>
+							<p>Here will be your clothes</p>
 						</div>
-					)):
-                    
-                    <div className="outfits-container">
-                        
-                        <p>Here will be your clothes</p>
-                    
-                    </div>}</div>
+					)}
+				</div>
 			</main>
 			<Footer />
 		</>

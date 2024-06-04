@@ -1,7 +1,7 @@
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import { useRef, useEffect, useState, useCallback } from "react";
-import { emptyForm } from "../utils/DBManipulations";
+import { emptyForm } from "../utils/db";
 
 import AddClothingDialog from "../components/AddClothingDialog";
 import ClothingFigure from "../components/ClothingFigure";
@@ -11,7 +11,6 @@ import PaginationPanel from "../components/PaginationPanel";
 
 export default function Closet() {
 	const [dialogOpen, setDialogOpen] = useState(false);
-	//const [clothes, setClothes] = useState(null);
 	const [filteredClothes, setFilteredClothes] = useState(null);
 	const searchContainer = useRef(null);
 	const [dialogData, setDialogData] = useState({
@@ -34,12 +33,10 @@ export default function Closet() {
 			setItemsPerPage(8);
 		} else if (width > 576) {
 			setItemsPerPage(7);
-		}else {
+		} else {
 			setItemsPerPage(5);
 		}
-
 	}, [setItemsPerPage]);
-
 
 	useEffect(() => {
 		adjustItemsPerPage();
@@ -52,24 +49,20 @@ export default function Closet() {
 	}, [adjustItemsPerPage]);
 
 	useEffect(() => {
-		//console.log("filteredClothes in useEffect:", filteredClothes);
 		if (filteredClothes) {
 			setTotalPages(Math.ceil(filteredClothes.length / itemsPerPage));
 			let updatedCurrentPage = currentPage;
 			if (currentPage >= Math.ceil(filteredClothes.length / itemsPerPage)) {
 				updatedCurrentPage = totalPages > 0 ? totalPages - 1 : 0;
 				setCurrentPage(updatedCurrentPage);
-			  }
-			  const startIndex = updatedCurrentPage * itemsPerPage;
-			  const endIndex = startIndex + itemsPerPage;
+			}
+			const startIndex = updatedCurrentPage * itemsPerPage;
+			const endIndex = startIndex + itemsPerPage;
 			setSubset(filteredClothes.slice(startIndex, endIndex));
-			
-			//console.log(subset);
 		}
 	}, [filteredClothes, itemsPerPage, currentPage]);
 
 	const handlePageChange = (e) => {
-		//console.log(currentPage);
 		setCurrentPage(e.selected);
 		const startIndex = e.selected * itemsPerPage;
 		const endIndex = startIndex + itemsPerPage;
@@ -83,12 +76,9 @@ export default function Closet() {
 		} else {
 			if (!Array.isArray(data.styles)) data.styles = [];
 			if (!data.color) data.color = "";
-		//console.log("handleDialogOpen edit mode data:", data);
 			setDialogData({ clothing: data, editingMode: true });
 		}
-	//console.log("data passed to dialog open: ", data);
 		setDialogOpen(true);
-		//console.log(dialogOpen);
 	};
 
 	const handleDialogClose = () => {
@@ -102,7 +92,6 @@ export default function Closet() {
 				<h1 className="page-title">Your closet</h1>
 				<FiltersContainer
 					searchRef={searchContainer}
-					//filteredClothes={filteredClothes}
 					setFilteredClothes={setFilteredClothes}
 				/>
 				<PaginationPanel
