@@ -2,14 +2,9 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { app } from "../config";
 import { useState, useEffect } from "react";
-import {
-	createUsername,
-	getDisplayName,
-	updateUser,
-} from "../utils/AuthManipulations";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// Initialize Firebase
-import { useLocation } from "react-router-dom";
+import { updateUser,  getDisplayName} from "../utils/auth";
 
 const auth = getAuth(app);
 
@@ -17,8 +12,6 @@ export default function Nav({ searchRef }) {
 	const navigate = useNavigate();
 	const [user, setUser] = useState(null);
 	const [searchOpen, setSearchOpen] = useState(false);
-	const location = useLocation();
-	const currentPage = location.pathname;
 
 	useEffect(() => {
 		updateUser(setUser);
@@ -30,11 +23,9 @@ export default function Nav({ searchRef }) {
 		}
 	});
 	function handleSearchOpen(e) {
-		//console.log(e.target, searchRef.current, searchOpen);
 		searchRef.current.hidden = searchOpen;
 
 		setSearchOpen(!searchOpen);
-		//console.log("after:", e.target, searchRef.current, searchOpen);
 	}
 	return (
 		<nav className="page-nav navbar navbar-expand-md">
@@ -105,6 +96,14 @@ export default function Nav({ searchRef }) {
 								className={({ isActive }) => (isActive ? "active" : "")}
 							>
 								Outfits calendar
+							</NavLink>
+						</li>
+						<li>
+							<NavLink
+								to="/trip-packer"
+								className={({ isActive }) => (isActive ? "active" : "")}
+							>
+								Trip packer
 							</NavLink>
 						</li>
 					</ul>

@@ -1,12 +1,9 @@
 import DialogWindow from "./Dialog";
 import { useState, useEffect, useRef } from "react";
 
-import {
-	writeClothing,
-	emptyForm,
-} from "../utils/DBManipulations";
-import {temperatureRanges, styles, colors} from "../utils/utils";
-import { uploadToStorageAndDB } from "../utils/StorageManipulations";
+import { writeClothing, emptyForm } from "../utils/db";
+import { temperatureRanges, styles, colors } from "../utils/utils";
+import { uploadToStorageAndDB } from "../utils/storage";
 import InvalidFeedback from "./InvalidFeedback";
 import SuccessAlert from "./SuccessAlert";
 import ErrorAlert from "./ErrorAlert";
@@ -46,21 +43,24 @@ export default function AddClothingDialog({
 			)
 		);
 	}
-	function fetchingDone(){
-		return bgRemoveStatus !== "identifying color" && bgRemoveStatus !== "uploading";
+	function fetchingDone() {
+		return (
+			bgRemoveStatus !== "identifying color" && bgRemoveStatus !== "uploading"
+		);
 	}
 	function dataIsValid() {
-		return isTemperaturesValid() && isTypeValid() && validateImage() && fetchingDone();
+		return (
+			isTemperaturesValid() &&
+			isTypeValid() &&
+			validateImage() &&
+			fetchingDone()
+		);
 	}
 	async function handleSubmit(e) {
 		e.preventDefault();
 		if (dataIsValid()) {
-			//console.log(clothing.id);
-			//console.log(imageBlob);
-			if (!clothing.styles) setClothing({...clothing, styles:[]});
-		//console.log(clothing);
-			if (imageBlob){
-			//console.log("have imageBlog, uploadToStorageAndDB")
+			if (!clothing.styles) setClothing({ ...clothing, styles: [] });
+			if (imageBlob) {
 				await uploadToStorageAndDB(
 					imageBlob,
 					clothing,
@@ -68,8 +68,7 @@ export default function AddClothingDialog({
 					setUploadingProgress,
 					setError
 				);
-			}else {
-			//console.log("don't have imageBlog, writeClothing  ")
+			} else {
 				await writeClothing(clothing);
 				setUploadingProgress(100);
 			}
@@ -92,30 +91,24 @@ export default function AddClothingDialog({
 		checkboxes.forEach((checkbox) => {
 			checkbox.checked = false;
 		});
-		//setClothing({ ...clothing, temperatures: [] });
 	}
 
 	useEffect(() => {
 		if (!data.clothing.conditions)
 			setClothing({ ...data.clothing, conditions: [] });
 		else setClothing(data.clothing);
-		//console.log(clothing)
-		//setImageBlob(data.imageUrl);
 	}, [data]);
 	useEffect(() => {
 		if (!dialogOpen && formSubmitted) {
 			setFormSubmitted(false);
 		}
-		if (!dialogOpen ) {
+		if (!dialogOpen) {
 			setBgRemoveStatus(null);
-
 		}
 	}, [data, dialogOpen, formSubmitted]);
 
 	const handleFileInputChange = (event) => {
-		//console.log("imageInput:",imageInput)
 		const file = event.target.files[0];
-		//console.log("file from input:",file);
 		if (file) {
 			setImageBlob(file);
 			const tempUrl = URL.createObjectURL(file);
@@ -125,10 +118,9 @@ export default function AddClothingDialog({
 				imageUrl: tempUrl,
 				imageName: tempName,
 			});
-		//console.log("clothing.imageUrl before color iden:", tempUrl, tempName);
 			setFormSubmitted(false);
 
-			if (!clothing.id){
+			if (!clothing.id) {
 				const reader = new FileReader();
 
 				reader.onloadend = () => {
@@ -137,69 +129,71 @@ export default function AddClothingDialog({
 
 				reader.readAsDataURL(file);
 			}
-
 		}
 	};
 
 	const uploadImageToImaggaApi = async (fileBase64, tempUrl, tempName) => {
-
 		setBgRemoveStatus("identifying color");
-		
+
 		(async () => {
 			try {
 				const timeoutPromise = new Promise((resolve, reject) => {
 					setTimeout(() => {
 						reject(new Error("Request timed out"));
-					}, 15000); // 10 seconds
+					}, 15000);
 				});
 
-				 await Promise.race([
-					axios.post('https://api.imagga.com/v2/colors', `image_base64=${encodeURIComponent(fileBase64)}`, {
-					  headers: {
-						'Authorization': 'Basic ' + btoa(imaggaApiKey + ':' + imaggaApiSecret),
-						'Content-Type': 'application/x-www-form-urlencoded'
-					  },
-					}),
-					timeoutPromise
-				  ]).then(response=>{
-					//console.log(response)
-					if (response.status < 200 || response.status >= 300){
-						setBgRemoveStatus("color timeout");
-						throw new Error(`HTTP error! status: ${response.status}`);
-					}
-	
-					const colorRes = response.data.result.colors.foreground_colors[0].closest_palette_color_parent;
-				//console.log(colorRes);
-	
-					setClothing({...clothing, color: colorRes, imageUrl: tempUrl, imageName: tempName});
-					setBgRemoveStatus("color done");
-				  }).catch(err=>{
-					console.error("imagga api error:", err)
-					if (err.message === "Request timed out") {
-						setBgRemoveStatus("color timeout");
-					} else {
-					//console.log(error);
-					}
-				  })
+				await Promise.race([
+					axios.post(
+						"https://api.imagga.com/v2/colors",
+						`image_base64=${encodeURIComponent(fileBase64)}`,
+						{
+							headers: {
+								Authorization:
+									"Basic " + btoa(imaggaApiKey + ":" + imaggaApiSecret),
+								"Content-Type": "application/x-www-form-urlencoded",
+							},
+						}
+					),
+					timeoutPromise,
+				])
+					.then((response) => {
+						if (response.status < 200 || response.status >= 300) {
+							setBgRemoveStatus("color timeout");
+							throw new Error(`HTTP error! status: ${response.status}`);
+						}
 
-				  
+						const colorRes =
+							response.data.result.colors.foreground_colors[0]
+								.closest_palette_color_parent;
 
-				
+						setClothing({
+							...clothing,
+							color: colorRes,
+							imageUrl: tempUrl,
+							imageName: tempName,
+						});
+						setBgRemoveStatus("color done");
+					})
+					.catch((err) => {
+						console.error("imagga api error:", err);
+						if (err.message === "Request timed out") {
+							setBgRemoveStatus("color timeout");
+						} else {
+							console.error(error);
+						}
+					});
 			} catch (error) {
 				if (error.message === "Request timed out") {
 					setBgRemoveStatus("color timeout");
 				} else {
-				//console.log(error);
+					console.error(error);
 				}
 			}
 		})();
-	
-	}
-	
+	};
 
 	const uploadImageToClipdropApi = async (file) => {
-		//const axios = require("axios");
-	//console.log("click");
 		setBgRemoveStatus("uploading");
 		// API endpoint
 		const form = new FormData();
@@ -210,15 +204,13 @@ export default function AddClothingDialog({
 		fetch("https://clipdrop-api.co/remove-background/v1", {
 			method: "POST",
 			headers: {
-				"x-api-key":
-					process.env.REACT_APP_CLIPDROP_API_KEY,
+				"x-api-key": process.env.REACT_APP_CLIPDROP_API_KEY,
 			},
 			body: form,
 		})
 			.then((response) => {
-			//console.log(response);
 				if (!response.ok) {
-				console.error("bg remove fetch error:");
+					console.error("bg remove fetch error:");
 					setBgRemoveStatus("error");
 					return null;
 				} else {
@@ -227,40 +219,32 @@ export default function AddClothingDialog({
 			})
 
 			.then((buffer) => {
-				// buffer here is a binary representation of the returned image
-			//console.log(buffer);
-				if (buffer){
-				const blob = new Blob([buffer], {
-					type: "image/png",
-					modifiedName: fileName,
-				});
-			//console.log(blob);
-				setImageBlob(blob);
-				setClothing({
-					...clothing,
-					imageUrl: URL.createObjectURL(blob),
-					imageName: fileName,
-				});
-				setBgRemoveStatus("done");
-			}
+				if (buffer) {
+					const blob = new Blob([buffer], {
+						type: "image/png",
+						modifiedName: fileName,
+					});
+					setImageBlob(blob);
+					setClothing({
+						...clothing,
+						imageUrl: URL.createObjectURL(blob),
+						imageName: fileName,
+					});
+					setBgRemoveStatus("done");
+				}
 			});
 	};
 
-	function capitalize(str) {
-		if (str.length >= 1) return str[0].toUpperCase() + str.slice(1, str.length);
-		else return str;
-	}
 	const handleCheckboxChange = (e) => {
-	//console.log(e.target);
 		const value = e.target.value;
 		if (e.target.name.startsWith("style") && clothing.styles == null) {
 			clothing.styles = [];
 		}
 		let updatedValues = e.target.name.startsWith("temperature")
 			? [...clothing.temperatures]
-			: (e.target.name.startsWith("style")
+			: e.target.name.startsWith("style")
 			? [...clothing.styles]
-			: [...clothing.conditions]);
+			: [...clothing.conditions];
 
 		if (e.target.checked) {
 			updatedValues.push(value);
@@ -271,11 +255,10 @@ export default function AddClothingDialog({
 		setClothing(
 			e.target.name.startsWith("temperature")
 				? { ...clothing, temperatures: updatedValues }
-				: (e.target.name.startsWith("style")
+				: e.target.name.startsWith("style")
 				? { ...clothing, styles: updatedValues }
-				: { ...clothing, conditions: updatedValues })
+				: { ...clothing, conditions: updatedValues }
 		);
-		//console.log(clothing.conditions)
 		setFormSubmitted(false);
 	};
 
@@ -331,13 +314,11 @@ export default function AddClothingDialog({
 								}
 							>
 								{clothing.imageUrl ? (
-									
 									<LazyLoadImage
-						alt="your clothing"
-						effect="blur"
-						src={clothing.imageUrl}
-                        
-					/>
+										alt="your clothing"
+										effect="blur"
+										src={clothing.imageUrl}
+									/>
 								) : (
 									<p>Here will be your image preview</p>
 								)}
@@ -357,7 +338,11 @@ export default function AddClothingDialog({
 							<button
 								className="button"
 								onClick={() => uploadImageToClipdropApi(imageBlob)}
-								disabled={(imageBlob == null || bgRemoveStatus === "uploading" || bgRemoveStatus === "identifying color")}
+								disabled={
+									imageBlob == null ||
+									bgRemoveStatus === "uploading" ||
+									bgRemoveStatus === "identifying color"
+								}
 							>
 								Remove Background
 							</button>
@@ -373,18 +358,28 @@ export default function AddClothingDialog({
 						) : bgRemoveStatus === "done" ? (
 							<SuccessAlert>Background removed successfully</SuccessAlert>
 						) : (
-							(bgRemoveStatus === "error" && (
-								<ErrorAlert>Api error occurred. Background wasn't removed</ErrorAlert>
-							))
+							bgRemoveStatus === "error" && (
+								<ErrorAlert>
+									Api error occurred. Background wasn't removed
+								</ErrorAlert>
+							)
 						)}
 					</div>
 
 					<div className="row">
 						<div className="col-12">
 							<label htmlFor="color" className="form-label">
-								You can specify clothing color manually: 
+								You can specify clothing color manually:
 							</label>
-							<ColorsSelect colorsArr={Object.keys(colors).sort((a, b) => a.localeCompare(b))} selectedColor={clothing.color} handleChange={(e)=>setClothing({...clothing, color: e.target.value})}/>
+							<ColorsSelect
+								colorsArr={Object.keys(colors).sort((a, b) =>
+									a.localeCompare(b)
+								)}
+								selectedColor={clothing.color}
+								handleChange={(e) =>
+									setClothing({ ...clothing, color: e.target.value })
+								}
+							/>
 						</div>
 					</div>
 
@@ -436,7 +431,9 @@ export default function AddClothingDialog({
 											id={`style-${index}`}
 											name={`style-${index}`}
 											value={style}
-											checked={clothing.styles && clothing.styles.includes(style)}
+											checked={
+												clothing.styles && clothing.styles.includes(style)
+											}
 											className="check-input temperature-check"
 											onChange={handleCheckboxChange}
 										/>
@@ -492,6 +489,11 @@ export default function AddClothingDialog({
 								: "Clothing item was successfully added to closet"}
 						</SuccessAlert>
 					)}
+					<div className="row">
+						<div className="col-12">
+							<p className="red">* - Required fields</p>
+						</div>
+					</div>
 					<div className="row">
 						<div className="col-12">
 							<button

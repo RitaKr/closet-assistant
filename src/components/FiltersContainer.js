@@ -1,20 +1,16 @@
 import { useRef, useState, useEffect } from "react";
-import { getClothes, clothesRef } from "../utils/DBManipulations";
+import { getClothes, clothesRef } from "../utils/db";
 import {
 	onChildAdded,
 	onChildChanged,
 	onChildRemoved,
 } from "firebase/database";
-import { auth } from "../utils/AuthManipulations";
+import { auth } from "../utils/auth";
 import ClosetSearch from "../components/ClosetSearch";
 import { temperatureRanges, colors } from "../utils/utils";
 const _ = require("lodash");
 
-export default function FiltersContainer({
-	searchRef,
-	//filteredClothes,
-	setFilteredClothes,
-}) {
+export default function FiltersContainer({ searchRef, setFilteredClothes }) {
 	const [sortDirection, setSortDirection] = useState(false);
 	const [sortParam, setSortParam] = useState("addDate");
 	const [clothes, setClothes] = useState(null);
@@ -31,9 +27,7 @@ export default function FiltersContainer({
 	}
 
 	function filterAndSortClothes(clothes, setFilteredClothes, sortingParameter) {
-		//console.log("in filterAndSortClothes:");
 		if (clothes) {
-			//console.log("in filterAndSortClothes:", clothes, typeSelect.current.value, tempSelect.current.value, inLaundryCheck.current.checked, sortingParameter);
 			const filtered = clothes.filter((cl) => {
 				return (
 					(typeSelect.current.value === "all" ||
@@ -58,7 +52,6 @@ export default function FiltersContainer({
 
 	function sortClothes(arrayToSort, sortingParameter) {
 		return _.orderBy(
-			//filteredClothes,
 			arrayToSort,
 			[(item) => item[sortingParameter].toLowerCase()],
 			[sortDirectionBtn.current.dataset.asc === "true" ? "asc" : "desc"]
@@ -71,7 +64,6 @@ export default function FiltersContainer({
 	}
 
 	function handleDirectionChange() {
-		//console.log(sortSelect.current.value, sortDirection);
 		sortDirectionBtn.current.dataset.asc = !sortDirection;
 		setSortDirection(!sortDirection);
 		filterAndSortClothes(clothes, setFilteredClothes, sortSelect.current.value);
@@ -108,10 +100,7 @@ export default function FiltersContainer({
 	onChildAdded(clothesRef, (data) => {
 		getClothes().then((data) => {
 			if (!clothes || clothes.length !== data.length) {
-				//console.log("added ", data);
-
 				setClothes(data);
-				//console.log("calling filterAndSortClothes after adding ", data);
 				if (data && sortSelect && sortSelect.current) {
 					filterAndSortClothes(
 						data,
@@ -123,12 +112,9 @@ export default function FiltersContainer({
 		});
 	});
 	onChildChanged(clothesRef, (refData) => {
-		//console.log("changed ", refData.val(),  clothes);
 		if (clothes) {
-			//console.log("changed (in if)", refData.val(), refData.val().id, clothes);
 			const thisCl = clothes.find((cl) => cl.id === refData.val().id);
 			//re-fetching and rerendering clothes only if they were changed through form (ignoring inLaundry check)
-			//console.log(thisCl, data.val())
 			if (
 				!thisCl ||
 				!refData ||
@@ -136,8 +122,6 @@ export default function FiltersContainer({
 				!equalObjects(thisCl, refData.val())
 			) {
 				getClothes().then((data) => {
-					//console.log("rerednder in change");
-
 					setClothes(data);
 					if (data && sortSelect && sortSelect.current) {
 						filterAndSortClothes(
@@ -152,11 +136,7 @@ export default function FiltersContainer({
 	});
 	onChildRemoved(clothesRef, (refData) => {
 		getClothes().then((data) => {
-			//console.log("data from getClothes:", data);
-			//console.log("removed ", refData);
-
 			setClothes(data);
-			//console.log("calling filterAndSortClothes after removing ", data);
 			if (data && sortSelect && sortSelect.current) {
 				filterAndSortClothes(
 					data,
@@ -171,8 +151,6 @@ export default function FiltersContainer({
 		async function fetchData() {
 			if (auth.currentUser) {
 				await getClothes().then((data) => {
-					//console.log("lastClothes:", data);
-
 					setClothes(data);
 					if (data && sortSelect && sortSelect.current) {
 						filterAndSortClothes(
@@ -188,10 +166,7 @@ export default function FiltersContainer({
 	}, [auth.currentUser]);
 
 	useEffect(() => {
-		//console.log(clothes);
-		//console.log("clothes in filterContainer: " + clothes);
 		if (clothes && sortSelect && sortSelect.current) {
-			//console.log("filtered and sorted");
 			filterAndSortClothes(
 				clothes,
 				setFilteredClothes,
@@ -339,7 +314,7 @@ export default function FiltersContainer({
 							className="sort-direction-btn"
 							onClick={handleDirectionChange}
 						>
-							{sortDirection ? "↑" : "↓" }
+							{sortDirection ? "↑" : "↓"}
 						</button>
 					</div>
 				</div>

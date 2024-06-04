@@ -1,4 +1,3 @@
-//import slideBg from '../assets/slider';
 import { useRef } from "react";
 export default function Header() {
 	let bgCounter = 4;
@@ -11,26 +10,23 @@ export default function Header() {
 	var xDown = null; //x touch coordinate for mobile scrolling
 
 	function slide(type, count, rightDirection) {
-        if (header.current) {
-		animation("center", `calc(50% ${rightDirection ? "-" : "+"} 150px)`);
-		setTimeout(() => {
-			count = changeBg(type, count);
-			changeOpacityForAll(count);
+		if (header.current) {
+			animation("center", `calc(50% ${rightDirection ? "-" : "+"} 150px)`);
+			setTimeout(() => {
+				count = changeBg(type, count);
+				changeOpacityForAll(count);
 
-			animation(`calc(50% ${rightDirection ? "+" : "-"} 150px)`, "center");
-		}, 140);
-    }
+				animation(`calc(50% ${rightDirection ? "+" : "-"} 150px)`, "center");
+			}, 140);
+		}
 	}
 
 	function changeBg(type, i) {
-		//console.log(count)
 		count += i;
-		//console.log(count)
 		if (count > bgCounter) count = 1;
 		if (count < 1) count = bgCounter;
 
 		const imageUrl = `${process.env.PUBLIC_URL}/images/headers/bg${count}.${type}`;
-		//console.log(imageUrl)
 		bg.current.style.backgroundImage = `url(${imageUrl})`;
 
 		return count;
@@ -87,8 +83,6 @@ export default function Header() {
 
 	function handleBGChange(e) {
 		let i = parseInt(e.target.dataset.i);
-		//console.log('e.target', e.target)
-		//console.log("i", i, "lastClick", lastClick);
 		if (lastClick > i) {
 			slide("jpg", i + 1 - count, false);
 		} else if (lastClick < i) {
@@ -96,14 +90,6 @@ export default function Header() {
 		}
 		lastClick = i;
 	}
-
-	// useEffect(() => {
-	// 	if (header.current) {
-	// 		setInterval(function () {
-	// 			slide("jpg", 1, true);
-	// 		}, 10000);
-	// 	}
-	// },[]);
 
 	return (
 		<header
